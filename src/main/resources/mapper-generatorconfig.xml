@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE generatorConfiguration
-        SYSTEM "F:\githup\mybatis\mybatisGeneratior\src\main\resources\dtd\mybatis-service-generator-config_1_0.dtd">
+        SYSTEM "src\main\resources\dtd\mybatis-service-generator-config_1_0.dtd">
 <generatorConfiguration>
     <!-- context 是逆向工程的主要配置信息 -->
     <!-- id：起个名字 -->
@@ -13,6 +13,7 @@
         </plugin>
 
         <plugin type="cn.xgl.mbg.plugin.ServicePlugin"/>
+        <plugin type="cn.xgl.mbg.plugin.ControllerPlugin"/>
 
         <!--optional,指在创建class时，对注释进行控制-->
         <commentGenerator>
@@ -42,7 +43,7 @@
         <!-- targetPackage：生成的实体类所在的包 -->
         <!-- targetProject：生成的实体类所在的硬盘位置 -->
         <javaModelGenerator targetPackage="cn.xgl.mbg.model"
-                            targetProject="src/main/java">
+                            targetProject="src/test/java">
             <!-- 是否允许子包 -->
             <property name="enableSubPackages" value="false"/>
             <!-- 是否对modal添加构造函数 -->
@@ -54,23 +55,28 @@
         </javaModelGenerator>
         <!-- targetPackage 和 targetProject：生成的 mapper 文件的包和位置 -->
         <sqlMapGenerator targetPackage="mapper"
-                         targetProject="src/main/resources">
+                         targetProject="src/test/resources">
             <!-- 针对数据库的一个配置，是否把 schema 作为字包名 -->
             <property name="enableSubPackages" value="false"/>
         </sqlMapGenerator>
         <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
         <javaClientGenerator type="XMLMAPPER"
                              targetPackage="cn.xgl.mbg.dao"
-                             targetProject="src/main/java">
+                             targetProject="src/test/java">
             <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为字包名 -->
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
 
         <javaServiceGenerator targetPackage="cn.xgl.mbg.service"
                               implementationPackage="cn.xgl.mbg.service.impl"
-                              targetProject="src/main/java"/>
+                              targetProject="src/test/java"/>
+
+        <javaControllerGenerator targetPackage="cn.xgl.mbg.controller"
+                              targetProject="src/test/java"/>
 
         <!-- tableName是数据库中的表名，domainObjectName是生成的JAVA模型名，后面的参数不用改，要生成更多的表就在下面继续加table标签 -->
-        <table tableName="TUMS_CNAME" domainObjectName="TumsCname"></table>
+        <table tableName="TUMS_CNAME" domainObjectName="TumsCname" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+        enableUpdateByExample="false" selectByExampleQueryId="false" >
+        </table>
     </context>
 </generatorConfiguration>

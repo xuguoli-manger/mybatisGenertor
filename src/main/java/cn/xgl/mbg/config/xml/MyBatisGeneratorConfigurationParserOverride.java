@@ -1,6 +1,7 @@
 package cn.xgl.mbg.config.xml;
 
 import cn.xgl.mbg.config.ContextOverride;
+import cn.xgl.mbg.config.JavaControllerGeneratorConfiguration;
 import cn.xgl.mbg.config.JavaServiceGeneratorConfiguration;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.config.xml.MyBatisGeneratorConfigurationParser;
@@ -13,7 +14,7 @@ import org.w3c.dom.NodeList;
 import java.util.Properties;
 
 /**
- * @Description:
+ * @Description: 解析配置文件
  * @Author: xgl
  * @Date: 2022/10/26 10:46
  */
@@ -86,6 +87,8 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
                     this.parseJavaClientGenerator(context, childNode);
                 } else if ("javaServiceGenerator".equals(childNode.getNodeName())) {
                     this.parseJavaServiceGenerator(context, childNode);
+                } else if ("javaControllerGenerator".equals(childNode.getNodeName())) {
+                    this.parseJavaControllerGenerator(context, childNode);
                 } else if ("table".equals(childNode.getNodeName())) {
                     this.parseTable(context, childNode);
                 }
@@ -128,6 +131,26 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
             Node childNode = nodeList.item(i);
             if (childNode.getNodeType() == 1 && "property".equals(childNode.getNodeName())) {
                 this.parseProperty(javaServiceGeneratorConfiguration, childNode);
+            }
+        }
+
+    }
+
+    public void parseJavaControllerGenerator(Context context, Node node) {
+        ContextOverride contextOverride = (ContextOverride) context; ////替换Context
+        JavaControllerGeneratorConfiguration javaControllerGeneratorConfiguration = new JavaControllerGeneratorConfiguration();
+        contextOverride.setJavaControllerGeneratorConfiguration(javaControllerGeneratorConfiguration);
+        Properties attributes = this.parseAttributes(node);
+        String targetPackage = attributes.getProperty("targetPackage");
+        String targetProject = attributes.getProperty("targetProject");
+        javaControllerGeneratorConfiguration.setTargetPackage(targetPackage);
+        javaControllerGeneratorConfiguration.setTargetProject(targetProject);
+        NodeList nodeList = node.getChildNodes();
+
+        for(int i = 0; i < nodeList.getLength(); ++i) {
+            Node childNode = nodeList.item(i);
+            if (childNode.getNodeType() == 1 && "property".equals(childNode.getNodeName())) {
+                this.parseProperty(javaControllerGeneratorConfiguration, childNode);
             }
         }
 

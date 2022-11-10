@@ -28,23 +28,27 @@ public class ServicePlugin extends PluginAdapter {
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) {
 
-        ContextOverride context = (ContextOverride) introspectedTable.getContext();
+        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
 
-        JavaServiceGeneratorConfiguration serviceGeneratorConfiguration;
+        JavaServiceGeneratorConfiguration serviceGeneratorConfiguration;//service 层 属性
 
         if ((serviceGeneratorConfiguration = context.getJavaServiceGeneratorConfiguration()) == null)
             return null;
 
-        String targetPackage = serviceGeneratorConfiguration.getTargetPackage();
-        String targetProject = serviceGeneratorConfiguration.getTargetProject();
-        String implementationPackage = serviceGeneratorConfiguration.getImplementationPackage();
+        String targetPackage = serviceGeneratorConfiguration.getTargetPackage();//service 包
+        String targetProject = serviceGeneratorConfiguration.getTargetProject();//service 项目地址
+        String implementationPackage = serviceGeneratorConfiguration.getImplementationPackage();//service 实现类 包
 
+        //增加 service 接口
         CompilationUnit addServiceInterface = addServiceInterface(introspectedTable, targetPackage);
+        //增加service 实现类
         CompilationUnit addServiceImplClazz = addServiceImplClazz(introspectedTable, targetPackage,
                 implementationPackage);
 
+        //生成service 接口 Java文件
         GeneratedJavaFile gjfServiceInterface = new GeneratedJavaFile(addServiceInterface, targetProject,
                 this.context.getProperty("javaFileEncoding"), this.context.getJavaFormatter());
+        //生成service 实现类 Java文件
         GeneratedJavaFile gjfServiceImplClazz = new GeneratedJavaFile(addServiceImplClazz, targetProject,
                 this.context.getProperty("javaFileEncoding"), this.context.getJavaFormatter());
 
@@ -54,41 +58,40 @@ public class ServicePlugin extends PluginAdapter {
         return list;
     }
 
+    /**
+     * 生成service 接口 编译单元
+     * @param introspectedTable 存储表信息
+     * @param targetPackage 目标包
+     * @return service 层接口
+     */
     protected CompilationUnit addServiceInterface(IntrospectedTable introspectedTable, String targetPackage) {
 
-        String entityClazzType = introspectedTable.getBaseRecordType();
+        String entityClazzType = introspectedTable.getBaseRecordType();//获取表 对应得 Java 类型 即Java对象名
 
-        String entityExampleClazzType = introspectedTable.getExampleType();
-        String domainObjectName = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
+        String entityExampleClazzType = introspectedTable.getExampleType();//获取mybatis 提供的 xxxExample对象名
+        String domainObjectName = introspectedTable.getFullyQualifiedTable().getDomainObjectName();//获取表名
 
         /*JavaTypeResolver javaTypeResolver = new JavaTypeResolverDefaultImpl();
 
         FullyQualifiedJavaType calculateJavaType = javaTypeResolver
                 .calculateJavaType(introspectedTable.getPrimaryKeyColumns().get(0));*/
 
+        //生成service 接口名称
         StringBuilder builder = new StringBuilder();
-
-        /*FullyQualifiedJavaType superInterfaceType = new FullyQualifiedJavaType(
-
-                builder.append("BaseService<")
-                        .append(entityClazzType)
-                        .append(",")
-                        .append(entityExampleClazzType)
-                        .append(",")
-                        .append(calculateJavaType.getShortName()).append(">").toString());*/
 
         Interface serviceInterface = new Interface(
                 builder.delete(0, builder.length())
                         .append(targetPackage)
                         .append(".")
+                        .append("I")
                         .append(domainObjectName)
                         .append("Service")
                         .toString()
         );
 
-        //serviceInterface.addSuperInterface(superInterfaceType);
         serviceInterface.setVisibility(JavaVisibility.PUBLIC);
 
+        //导入mode层对象 这里已舍弃 直接在 method 层导入
         //FullyQualifiedJavaType baseServiceInstance = FullyQualifiedJavaTypeProxyFactory.getBaseServiceInstance();
         FullyQualifiedJavaType modelJavaType = new FullyQualifiedJavaType(entityClazzType);
         FullyQualifiedJavaType exampleJavaType = new FullyQualifiedJavaType(entityExampleClazzType);
@@ -97,6 +100,7 @@ public class ServicePlugin extends PluginAdapter {
         //serviceInterface.addImportedType(exampleJavaType);
         //serviceInterface.addFileCommentLine("/*** copyright (c) 2019 Marvis  ***/");
 
+        //获取mapper 名称
         String mapperName = builder.delete(0, builder.length())
                 .append(Character.toLowerCase(domainObjectName.charAt(0)))
                 .append(domainObjectName.substring(1))
@@ -104,10 +108,17 @@ public class ServicePlugin extends PluginAdapter {
                 .toString();
 
 
-        this.additionalServiceMethods(introspectedTable, serviceInterface,mapperName);
+        this.additionalServiceMethods(introspectedTable, serviceInterface,mapperName);//生成service 层方法
         return serviceInterface;
     }
 
+    /**
+     * 生成service 实现类 编译单元
+     * @param introspectedTable 存储表信息
+     * @param targetPackage 目标包
+     * @param implementationPackage 实现类包
+     * @return service 层实现类
+     */
     protected CompilationUnit addServiceImplClazz(IntrospectedTable introspectedTable, String targetPackage,
                                                   String implementationPackage) {
 
@@ -124,29 +135,19 @@ public class ServicePlugin extends PluginAdapter {
 */
         StringBuilder builder = new StringBuilder();
 
-       /* FullyQualifiedJavaType superClazzType = new FullyQualifiedJavaType(
-
-                builder.append("BaseServiceImpl<")
-                        .append(entityClazzType)
-                        .append(",")
-                        .append(entityExampleClazzType)
-                        .append(",")
-                        .append(calculateJavaType.getShortName()).append(">")
-                        .toString()
-        );*/
-
+        //service 接口 类型
         FullyQualifiedJavaType implInterfaceType = new FullyQualifiedJavaType(
-
                 builder.delete(0, builder.length())
                         .append(targetPackage)
                         .append(".")
+                        .append("I")
                         .append(domainObjectName)
                         .append("Service")
                         .toString()
         );
 
+        //service 实现类
         TopLevelClass serviceImplClazz = new TopLevelClass(
-
                 builder.delete(0, builder.length())
                         .append(implementationPackage)
                         .append(".")
@@ -162,30 +163,27 @@ public class ServicePlugin extends PluginAdapter {
 
         //FullyQualifiedJavaType baseServiceInstance = FullyQualifiedJavaTypeProxyFactory.getBaseServiceImplInstance();
 
-        FullyQualifiedJavaType modelJavaType = new FullyQualifiedJavaType(entityClazzType);
-        FullyQualifiedJavaType exampleJavaType = new FullyQualifiedJavaType(entityExampleClazzType);
-        serviceImplClazz
-                .addImportedType(new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired"));
-        serviceImplClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.stereotype.Service"));
+        //FullyQualifiedJavaType modelJavaType = new FullyQualifiedJavaType(entityClazzType);
+        //FullyQualifiedJavaType exampleJavaType = new FullyQualifiedJavaType(entityExampleClazzType);
         //serviceImplClazz.addImportedType(baseServiceInstance);
         //serviceImplClazz.addImportedType(modelJavaType);
         //serviceImplClazz.addImportedType(exampleJavaType);
+        serviceImplClazz
+                .addImportedType(new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired"));
+        serviceImplClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.stereotype.Service"));
         serviceImplClazz.addImportedType(implInterfaceType);
 
+        //mapper 名称
         String mapperName = builder.delete(0, builder.length())
                 .append(Character.toLowerCase(domainObjectName.charAt(0)))
                 .append(domainObjectName.substring(1))
                 .append("Mapper")
                 .toString();
 
-      /*  introspectedTable.getGeneratedJavaFiles().stream().filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(
-                mapperName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
-                compilationUnit -> ((Interface) compilationUnit).getImportedTypes().forEach(fullyQualifiedJavaType -> {
-                    fullyQualifiedJavaType.
-                }));*/
-
+        //mapper 类型
         FullyQualifiedJavaType JavaMapperType = new FullyQualifiedJavaType(javaMapperType);
 
+        //引入mapper bean
         Field mapperField = new Field(mapperName,JavaMapperType);
         mapperField.setVisibility(JavaVisibility.PUBLIC);
         /*mapperField.setType(JavaMapperType);// Mapper.java
@@ -193,24 +191,21 @@ public class ServicePlugin extends PluginAdapter {
         mapperField.addAnnotation("@Autowired");
         serviceImplClazz.addField(mapperField);
         serviceImplClazz.addImportedType(JavaMapperType);
-
-        /*Method mapperMethod = new Method("setMapper");
-        mapperMethod.setVisibility(JavaVisibility.PUBLIC);
-        //mapperMethod.setName("setMapper");
-        mapperMethod.addBodyLine("super.setMapper(" + mapperName + ");");
-        mapperMethod.addAnnotation("@Autowired");
-
-        serviceImplClazz.addMethod(mapperMethod);*/
-        //serviceImplClazz.addFileCommentLine("/*** copyright (c) 2019 Marvis  ***/");
-
         serviceImplClazz
                 .addImportedType(new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired"));
 
+        //生成mapper 实现类方法
         this.additionalServiceImplMethods(introspectedTable, serviceImplClazz, mapperName);
 
         return serviceImplClazz;
     }
 
+    /**
+     * 生成mapper 接口方法
+     * @param introspectedTable 表信息
+     * @param serviceInterface service 接口
+     * @param mapperName mapper 名称
+     */
     protected void additionalServiceMethods(IntrospectedTable introspectedTable, Interface serviceInterface,
                                             String mapperName) {
 
@@ -221,11 +216,17 @@ public class ServicePlugin extends PluginAdapter {
                 mapperName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
                 compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(
                         m -> {
-                            m.setAbstract(true);
+                            m.setAbstract(true);//抽象类
                             serviceInterface.addMethod(this.additionalServiceLayerMethod(serviceInterface, m));
                         }));
     }
 
+    /**
+     * service 实现类 方法
+     * @param introspectedTable 表信息
+     * @param clazz service 实现类
+     * @param mapperName mapper 名称
+     */
     protected void additionalServiceImplMethods(IntrospectedTable introspectedTable, TopLevelClass clazz,
                                                 String mapperName) {
 
@@ -249,6 +250,12 @@ public class ServicePlugin extends PluginAdapter {
         return !introspectedTable.hasBLOBColumns();
     }
 
+    /**
+     * 生成 方法
+     * @param compilation 类信息 编译单元
+     * @param m mapper方法
+     * @return 方法
+     */
     private Method additionalServiceLayerMethod(CompilationUnit compilation, Method m) {
 
         Method method = new Method(m.getName());
@@ -257,13 +264,17 @@ public class ServicePlugin extends PluginAdapter {
 
         List<Parameter> parameters = m.getParameters();
 
+        //设置方法 参数 去除注解
         method.getParameters().addAll(parameters.stream().peek(param -> param.getAnnotations().clear()).collect(Collectors.toList()));
 
+        //导入 参数 类型
         compilation.addImportedTypes(parameters.stream().peek(param -> param.getAnnotations().clear()).flatMap(
                 parameter -> Stream.of(new FullyQualifiedJavaType(parameter.getType().getFullyQualifiedNameWithoutTypeParameters()))).
                 collect(Collectors.toSet()));
 
+        //方法设置返回值
         method.setReturnType(m.getReturnType().orElse(null));
+        //导入返回值类型
         if(m.getReturnType().isPresent()){
             compilation.addImportedType(
                     new FullyQualifiedJavaType(m.getReturnType().get().getFullyQualifiedNameWithoutTypeParameters()));
@@ -271,6 +282,12 @@ public class ServicePlugin extends PluginAdapter {
         return method;
     }
 
+    /**
+     * 生成方法 body 方法体
+     * @param mapperName mapper 名称
+     * @param m mapper 方法
+     * @return 方法体
+     */
     private String generateBodyForServiceImplMethod(String mapperName, Method m) {
         StringBuilder sbf = new StringBuilder("return ");
         sbf.append(mapperName).append(".").append(m.getName()).append("(");

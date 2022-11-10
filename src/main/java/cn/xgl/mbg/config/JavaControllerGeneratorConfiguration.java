@@ -8,16 +8,15 @@ import static org.mybatis.generator.internal.util.StringUtility.stringHasValue;
 import static org.mybatis.generator.internal.util.messages.Messages.getString;
 
 /**
- * @Description: service 层 属性配置
+ * @Description: controller 层 属性配置
  * @Author: xgl
  * @Date: 2022/10/26 10:34
  */
-public class JavaServiceGeneratorConfiguration extends TypedPropertyHolder {
+public class JavaControllerGeneratorConfiguration extends TypedPropertyHolder {
     private String targetPackage;
     private String targetProject;
-    private String implementationPackage;
 
-    public JavaServiceGeneratorConfiguration() {
+    public JavaControllerGeneratorConfiguration() {
         super();
     }
 
@@ -37,26 +36,14 @@ public class JavaServiceGeneratorConfiguration extends TypedPropertyHolder {
         this.targetPackage = targetPackage;
     }
 
-    public String getImplementationPackage() {
-        return implementationPackage;
-    }
-
-    public void setImplementationPackage(String implementationPackage) {
-        this.implementationPackage = implementationPackage;
-    }
-
     public void validate(List<String> errors, String contextId) {
         if (!stringHasValue(targetProject)) {
-            errors.add(getString("ValidationError.102", contextId)); //$NON-NLS-1$
+            errors.add(getString("ValidationError.202", contextId)); //$NON-NLS-1$
         }
 
         if (!stringHasValue(targetPackage)) {
-            errors.add(getString("ValidationError.112", //$NON-NLS-1$
+            errors.add(getString("ValidationError.212", //$NON-NLS-1$
                     "javaServiceGenerator", contextId)); //$NON-NLS-1$
-        }
-
-        if (!stringHasValue(implementationPackage)) {
-            errors.add(getString("ValidationError.120", contextId)); //$NON-NLS-1$
         }
     }
 }
