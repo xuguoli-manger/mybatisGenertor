@@ -127,4 +127,1264 @@
     where CNAME = #{cname,jdbcType=VARCHAR}
       and DNAME = #{dname,jdbcType=VARCHAR}
   </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <resultMap id="BaseResultMap" type="cn.xgl.mbg.model.TumsCname">
+    <constructor>
+      <idArg column="CNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <idArg column="DNAME" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="CNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="DNAMECP" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REGION" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="REQS" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="IMPORTRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+      <arg column="SELFRATE" javaType="java.lang.Double" jdbcType="FLOAT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    CNAME, DNAME, CNAMECP, DNAMECP, REGION, REQS, IMPORTRATE, SELFRATE
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from TUMS_CNAME
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME (CNAME, DNAME, CNAMECP, 
+      DNAMECP, REGION, REQS, 
+      IMPORTRATE, SELFRATE)
+    values (#{cname,jdbcType=VARCHAR}, #{dname,jdbcType=VARCHAR}, #{cnamecp,jdbcType=VARCHAR}, 
+      #{dnamecp,jdbcType=VARCHAR}, #{region,jdbcType=VARCHAR}, #{reqs,jdbcType=INTEGER}, 
+      #{importrate,jdbcType=FLOAT}, #{selfrate,jdbcType=FLOAT})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    insert into TUMS_CNAME
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        CNAME,
+      </if>
+      <if test="dname != null">
+        DNAME,
+      </if>
+      <if test="cnamecp != null">
+        CNAMECP,
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP,
+      </if>
+      <if test="region != null">
+        REGION,
+      </if>
+      <if test="reqs != null">
+        REQS,
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE,
+      </if>
+      <if test="selfrate != null">
+        SELFRATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cname != null">
+        #{cname,jdbcType=VARCHAR},
+      </if>
+      <if test="dname != null">
+        #{dname,jdbcType=VARCHAR},
+      </if>
+      <if test="cnamecp != null">
+        #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        #{selfrate,jdbcType=FLOAT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    <set>
+      <if test="cnamecp != null">
+        CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="dnamecp != null">
+        DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null">
+        REGION = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="reqs != null">
+        REQS = #{reqs,jdbcType=INTEGER},
+      </if>
+      <if test="importrate != null">
+        IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      </if>
+      <if test="selfrate != null">
+        SELFRATE = #{selfrate,jdbcType=FLOAT},
+      </if>
+    </set>
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.xgl.mbg.model.TumsCname">
+    update TUMS_CNAME
+    set CNAMECP = #{cnamecp,jdbcType=VARCHAR},
+      DNAMECP = #{dnamecp,jdbcType=VARCHAR},
+      REGION = #{region,jdbcType=VARCHAR},
+      REQS = #{reqs,jdbcType=INTEGER},
+      IMPORTRATE = #{importrate,jdbcType=FLOAT},
+      SELFRATE = #{selfrate,jdbcType=FLOAT}
+    where CNAME = #{cname,jdbcType=VARCHAR}
+      and DNAME = #{dname,jdbcType=VARCHAR}
+  </update>
 </mapper>
