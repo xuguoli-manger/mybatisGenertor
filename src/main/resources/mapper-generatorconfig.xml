@@ -8,8 +8,11 @@
     <context id="default" targetRuntime="MyBatis3" defaultModelType="flat">
 
         <plugin type="cn.xgl.mbg.plugin.LombokPlugin">
-            <property name="hasLombok" value="true"/>
-            <property name="lombok" value="123"/>
+            <property name="Data" value="true"/>
+            <property name="Getter" value="true"/>
+            <property name="Setter" value="true"/>
+            <property name="ToString" value="true"/>
+            <property name="EqualsAndHashCode" value="true"/>
         </plugin>
 
         <plugin type="cn.xgl.mbg.plugin.ServicePlugin"/>
@@ -23,15 +26,17 @@
         </commentGenerator>
 
         <!--jdbc的数据库连接 mysql-->
-        <!--<jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
                         connectionURL="jdbc:mysql://localhost:3306/usermanger?useUnicode=true&amp;characeterEncoding=utf-8&amp;serverTimezone=UTC"
                         userId="root"
-                        password="123456"></jdbcConnection>-->
+                        password="123456">
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
 
         <!--sqlite对应驱动书写方式-->
-        <jdbcConnection driverClass="org.sqlite.JDBC"
+        <!--<jdbcConnection driverClass="org.sqlite.JDBC"
                         connectionURL="jdbc:sqlite:D:\sqlite\tums\tums.db">
-        </jdbcConnection>
+        </jdbcConnection>-->
         <!--非必须，类型处理器，在数据库类型和java类型之间的转换控制-->
         <javaTypeResolver>
             <!-- 默认情况下数据库中的 decimal，bigInt 在 Java 对应是 sql 下的 BigDecimal 类 -->
@@ -47,7 +52,7 @@
             <!-- 是否允许子包 -->
             <property name="enableSubPackages" value="false"/>
             <!-- 是否对modal添加构造函数 -->
-            <property name="constructorBased" value="true"/>
+            <property name="constructorBased" value="false"/>
             <!-- 是否清理从数据库中查询出的字符串左右两边的空白字符 -->
             <property name="trimStrings" value="true"/>
             <!-- 建立modal对象是否不可改变 即生成的modal对象不会有setter方法，只有构造方法 -->
@@ -72,10 +77,12 @@
                               targetProject="src/test/java"/>
 
         <javaControllerGenerator targetPackage="cn.xgl.mbg.controller"
-                              targetProject="src/test/java"/>
+                              targetProject="src/test/java">
+            <property name="swagger_open" value="true"/>
+        </javaControllerGenerator>
 
         <!-- tableName是数据库中的表名，domainObjectName是生成的JAVA模型名，后面的参数不用改，要生成更多的表就在下面继续加table标签 -->
-        <table tableName="TUMS_CNAME" domainObjectName="TumsCname" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
+        <table tableName="user" domainObjectName="User" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
         enableUpdateByExample="false" selectByExampleQueryId="false" >
         </table>
     </context>

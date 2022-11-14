@@ -22,6 +22,10 @@ public class ControllerPlugin extends PluginAdapter {
 
     Map<String,Object> remarks = new HashMap<>();//存放 表注释 列 注释 主键是表和列的Java名称
 
+    private static Boolean SWAGGER_API_SWITCH = false;
+
+    private static final String SWAGGER_OPEN = "swagger_open";
+
     public boolean validate(List<String> list) {
         return true;
     }
@@ -42,10 +46,10 @@ public class ControllerPlugin extends PluginAdapter {
         if ((serviceGeneratorConfiguration = context.getJavaServiceGeneratorConfiguration()) == null || (controllerGeneratorConfiguration = context.getJavaControllerGeneratorConfiguration()) == null)
             return null;
 
-        remarks.put(introspectedTable.getFullyQualifiedTable().getDomainObjectName(),introspectedTable.getRemarks());//存储表注释
-        introspectedTable.getPrimaryKeyColumns().forEach(introspectedColumn -> {//存储列注释
-            remarks.put(introspectedColumn.getJavaProperty(),introspectedColumn.getRemarks());
-        });
+        //设置swagger 开关
+        setSwagger(introspectedTable);
+        //设置字段注释
+        setRemarks(introspectedTable);
 
         String targetPackage = controllerGeneratorConfiguration.getTargetPackage();//controller 包
         String targetProject = controllerGeneratorConfiguration.getTargetProject();//controller 项目地址
@@ -66,57 +70,41 @@ public class ControllerPlugin extends PluginAdapter {
     //model设置swagger
     @Override
     public boolean modelFieldGenerated(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn, IntrospectedTable introspectedTable, ModelClassType modelClassType) {
-        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
-
-        //controller 层 必须在service 层 存在才生成
-        if (context.getJavaControllerGeneratorConfiguration() == null)
+        if(validate(topLevelClass,introspectedTable)){
             return true;
-
-        field.addAnnotation("@ApiModelProperty(value =\""+Optional.ofNullable(introspectedColumn.getRemarks()).orElse(introspectedColumn.getJavaProperty())+"\")");
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModelProperty"));
-
+        }
+        setSwagger(introspectedTable);
+        setApiModelProperty(field, topLevelClass, introspectedColumn);
         return true;
     }
 
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
-
-        //controller 层 必须在service 层 存在才生成
-        if (context.getJavaControllerGeneratorConfiguration() == null)
+        if(validate(topLevelClass,introspectedTable)){
             return true;
-
-        topLevelClass.addAnnotation("@ApiModel(value =\""+Optional.ofNullable(introspectedTable.getRemarks()).orElse(introspectedTable.getFullyQualifiedTable().getDomainObjectName())+"\")");
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModel"));
-
+        }
+        setSwagger(introspectedTable);
+        setApiModel(topLevelClass, introspectedTable);
         return true;
     }
 
     @Override
     public boolean modelRecordWithBLOBsClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
-
-        //controller 层 必须在service 层 存在才生成
-        if (context.getJavaControllerGeneratorConfiguration() == null)
+        if(validate(topLevelClass,introspectedTable)){
             return true;
-
-        topLevelClass.addAnnotation("@ApiModel(value =\""+Optional.ofNullable(introspectedTable.getRemarks()).orElse(introspectedTable.getFullyQualifiedTable().getDomainObjectName())+"\")");
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModel"));
-
+        }
+        setSwagger(introspectedTable);
+        setApiModel(topLevelClass, introspectedTable);
         return true;
     }
 
     @Override
     public boolean modelExampleClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
-
-        //controller 层 必须在service 层 存在才生成
-        if (context.getJavaControllerGeneratorConfiguration() == null)
+        if(validate(topLevelClass,introspectedTable)){
             return true;
-
-        topLevelClass.addAnnotation("@ApiModel(value =\""+Optional.ofNullable(introspectedTable.getRemarks()).orElse(introspectedTable.getFullyQualifiedTable().getDomainObjectName())+"\")");
-        topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModel"));
-
+        }
+        setSwagger(introspectedTable);
+        setApiModel(topLevelClass, introspectedTable);
         return true;
     }
 
@@ -145,14 +133,15 @@ public class ControllerPlugin extends PluginAdapter {
 
         controllerClazz.setVisibility(JavaVisibility.PUBLIC);
         controllerClazz.addAnnotation("@RestController");
-        controllerClazz.addAnnotation("@Api(tags =\""+introspectedTable.getRemarks()+"\")");
         controllerClazz.addAnnotation("@RequestMapping(\"/"+Character.toLowerCase(domainObjectName.charAt(0))+domainObjectName.substring(1)+"\")");
 
         controllerClazz
                 .addImportedType(new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired"));
         controllerClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.web.bind.annotation.RestController"));
-        controllerClazz.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.Api"));
         controllerClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.web.bind.annotation.RequestMapping"));
+
+        //设置swagger api
+        setApi(controllerClazz,introspectedTable);
 
         //mapper 接口 名称
         String mapperName = builder.delete(0, builder.length())
@@ -211,7 +200,7 @@ public class ControllerPlugin extends PluginAdapter {
                     m.setAbstract(false);
                     Method controllerMethod = this.additionalControllerLayerMethod(clazz, m);
                     controllerMethod.addAnnotation("@RequestMapping(\"/"+m.getName()+"\")");
-                    controllerMethod.addBodyLine(this.generateBodyForControllerMethod(serviceInterfaceName, m));
+                    controllerMethod.addBodyLine(this.generateBodyForControllerMethod(serviceInterfaceName, controllerMethod));
 
                     clazz.addMethod(controllerMethod);
                 }));
@@ -233,19 +222,27 @@ public class ControllerPlugin extends PluginAdapter {
         Method method = new Method(m.getName());
         method.setVisibility(JavaVisibility.PUBLIC);
         method.setAbstract(m.isAbstract());
-        method.addAnnotation("@ApiOperation(value =\""+MethodRemark.getRemarkByMethodName(method.getName())+"\")");
 
         List<Parameter> parameters = m.getParameters();
 
+        List<Parameter> params = new ArrayList<>();
+        parameters.forEach(parameter -> {
+            if(parameter.getName().equals("row")){//row 在mybatis generator 生成参数中 代表生成的对象 参数名  这里替换为首字母小写 eg User row  User user
+                String name = parameter.getType().getShortName();
+                params.add(new Parameter(parameter.getType(),Character.toLowerCase(name.charAt(0))+name.substring(1)));
+            }else{
+                params.add(parameter);
+            }
+        });
+
         //导入 参数 类型
-        compilation.addImportedTypes(parameters.stream().peek(param -> param.getAnnotations().clear()).flatMap(
-                parameter -> Stream.of(new FullyQualifiedJavaType(parameter.getType().getFullyQualifiedNameWithoutTypeParameters()))).
+        compilation.addImportedTypes(params.stream().flatMap(
+                param -> Stream.of(new FullyQualifiedJavaType(param.getType().getFullyQualifiedNameWithoutTypeParameters()))).
                 collect(Collectors.toSet()));
 
-        //设置方法 参数 去除注解
-        method.getParameters().addAll(parameters.stream().peek(parameter ->
-                parameter.addAnnotation("@ApiParam(name=\""+parameter.getName()+"\"," +
-                        "value=\""+ Optional.ofNullable(remarks.get(parameter.getName())).orElse(parameter.getName())+"\")")).collect(Collectors.toList()));
+        //设置方法 参数
+        method.getParameters().addAll(params.stream().peek(param ->
+                setApiParam(compilation,param)).collect(Collectors.toList()));
 
         //方法设置返回值
         method.setReturnType(m.getReturnType().orElse(null));
@@ -254,8 +251,7 @@ public class ControllerPlugin extends PluginAdapter {
             compilation.addImportedType(
                     new FullyQualifiedJavaType(m.getReturnType().get().getFullyQualifiedNameWithoutTypeParameters()));
         }
-        compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiParam"));
-        compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiOperation"));
+        setApiOperation(compilation,method);
         return method;
     }
 
@@ -283,6 +279,67 @@ public class ControllerPlugin extends PluginAdapter {
         sbf.append(");");
         return sbf.toString();
     }
+
+    private boolean validate(TopLevelClass topLevelClass, IntrospectedTable introspectedTable){
+        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
+        //controller 层 必须在service 层 存在才生成
+        return context.getJavaControllerGeneratorConfiguration() == null;
+    }
+
+    private void setApiModel(TopLevelClass topLevelClass, IntrospectedTable introspectedTable){
+        if(SWAGGER_API_SWITCH){
+            topLevelClass.addAnnotation("@ApiModel(value =\""+Optional.ofNullable(introspectedTable.getRemarks()).orElse(introspectedTable.getFullyQualifiedTable().getDomainObjectName())+"\")");
+            topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModel"));
+        }
+    }
+
+    private void setApi(TopLevelClass topLevelClass, IntrospectedTable introspectedTable){
+        if(SWAGGER_API_SWITCH){
+            topLevelClass.addAnnotation("@Api(tags =\""+introspectedTable.getRemarks()+"\")");
+            topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.Api"));
+        }
+    }
+
+    private void setApiModelProperty(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn) {
+        if(SWAGGER_API_SWITCH){
+            field.addAnnotation("@ApiModelProperty(value =\""+Optional.ofNullable(introspectedColumn.getRemarks()).orElse(introspectedColumn.getJavaProperty())+"\")");
+            topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModelProperty"));
+        }
+    }
+
+    private void setApiOperation(CompilationUnit compilation, Method method) {
+        if(SWAGGER_API_SWITCH){
+            method.addAnnotation("@ApiOperation(value =\""+MethodRemark.getRemarkByMethodName(method.getName())+"\")");
+            compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiOperation"));
+        }
+    }
+
+    private void setApiParam(CompilationUnit compilation, Parameter parameter) {
+        if(SWAGGER_API_SWITCH){
+            compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiParam"));
+            parameter.addAnnotation("@ApiParam(name=\""+parameter.getName()+"\"," +
+                    "value=\""+ Optional.ofNullable(remarks.get(parameter.getName())).orElse(parameter.getName())+"\")");
+        }
+    }
+
+    private void setSwagger(IntrospectedTable introspectedTable) {
+        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
+        JavaControllerGeneratorConfiguration controllerGeneratorConfiguration = context.getJavaControllerGeneratorConfiguration();
+        if(controllerGeneratorConfiguration.getProperties().getProperty(SWAGGER_OPEN) != null){
+            SWAGGER_API_SWITCH = "true".equals(controllerGeneratorConfiguration.getProperties().getProperty(SWAGGER_OPEN));
+        }
+    }
+
+    private void setRemarks(IntrospectedTable introspectedTable){
+        if(SWAGGER_API_SWITCH){
+            String name = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
+            remarks.put(Character.toLowerCase(name.charAt(0))+name.substring(1),introspectedTable.getRemarks());//存储表注释
+            introspectedTable.getPrimaryKeyColumns().forEach(introspectedColumn -> {//存储列注释
+                remarks.put(introspectedColumn.getJavaProperty(),introspectedColumn.getRemarks());
+            });
+        }
+    }
+
 
     private enum MethodRemark{
         deleteByPrimaryKey("通过主键删除"),

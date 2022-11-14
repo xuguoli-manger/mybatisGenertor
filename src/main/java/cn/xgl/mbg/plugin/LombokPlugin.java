@@ -10,6 +10,7 @@ import org.mybatis.generator.api.dom.java.TopLevelClass;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class LombokPlugin extends PluginAdapter {
 
@@ -21,16 +22,24 @@ public class LombokPlugin extends PluginAdapter {
     }
 
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        if (properties.getProperty("lombok") == null) {
-            topLevelClass.addImportedType("lombok.Data");
+        if(properties.isEmpty()){
             topLevelClass.addAnnotation("@Data");
-        } else {
-            topLevelClass.addImportedType("lombok.Getter");
-            topLevelClass.addImportedType("lombok.Setter");
-            topLevelClass.addImportedType("lombok.ToString");
-            topLevelClass.addAnnotation("@Getter");
-            topLevelClass.addAnnotation("@Setter");
-            topLevelClass.addAnnotation("@ToString");
+            topLevelClass.addImportedType("lombok.Data");
+        }else{
+            if(properties.getProperty("Data") != null && properties.getProperty("Data").equals("true")){
+                properties.remove("Getter");
+                properties.remove("Setter");
+                properties.remove("RequiredArgsConstructor");
+                properties.remove("ToString");
+                properties.remove("EqualsAndHashCode");
+                properties.remove("Value");
+            }
+            properties.forEach((key, value) -> {
+                if(value.equals("true")){
+                    topLevelClass.addAnnotation("@"+key);
+                }
+            });
+            topLevelClass.addImportedType("lombok.*");
         }
         topLevelClass.addJavaDocLine("/**");
         topLevelClass.addJavaDocLine("* Created by Mybatis Generator " + this.date2Str(new Date()));
@@ -52,6 +61,8 @@ public class LombokPlugin extends PluginAdapter {
     public boolean modelGetterMethodGenerated(Method method, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn, IntrospectedTable introspectedTable, ModelClassType modelClassType) {
         return false;
     }
+
+
 
     private String date2Str(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH");
