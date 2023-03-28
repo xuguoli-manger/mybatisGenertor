@@ -7,6 +7,8 @@
     <!-- targetRuntime：设置生成的文件适用于那个 mybatis 版本 -->
     <context id="default" targetRuntime="MyBatis3" defaultModelType="flat">
 
+        <property name="targetProjectPath" value="D:\git\cloud-demo\service-demo"/>
+
         <plugin type="cn.xgl.mbg.plugin.LombokPlugin">
             <property name="Data" value="true"/>
             <property name="Getter" value="true"/>
@@ -15,21 +17,37 @@
             <property name="EqualsAndHashCode" value="true"/>
         </plugin>
 
+        <!--xml文件生成默认是合并 这里进行关闭-->
+        <plugin type="cn.xgl.mbg.plugin.OverWriteXmlPlugin"/>
+        <plugin type="cn.xgl.mbg.plugin.DaoPlugin">
+            <property name="pageMethod" value="true"/>
+        </plugin>
         <plugin type="cn.xgl.mbg.plugin.ServicePlugin"/>
         <plugin type="cn.xgl.mbg.plugin.ControllerPlugin"/>
 
         <!--optional,指在创建class时，对注释进行控制-->
-        <commentGenerator>
-            <property name="suppressDate" value="true"/>
+        <commentGenerator type="cn.xgl.mbg.plugin.MyCommentGenerator">
+            <property name="suppressDate" value="false"/>
             <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
-            <property name="suppressAllComments" value="true"/>
+            <property name="suppressAllComments" value="false"/>
+            <!--作者-->
+            <property name="author" value="xgl"/>
+            <!--项目版本号-->
+            <property name="version" value="0.0.1-SNAPSHOT"/>
+            <!--controller 注释全部开启-->
+            <property name="controllerAllComments" value="true"/>
+            <!--controller 方法注释关闭-->
+            <!--<property name="controllerMethodComments" value="false"/>-->
+            <!--service 注释全部开启-->
+            <property name="serviceAllComments" value="true"/>
+
         </commentGenerator>
 
         <!--jdbc的数据库连接 mysql-->
-        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/usermanger?useUnicode=true&amp;characeterEncoding=utf-8&amp;serverTimezone=UTC"
-                        userId="root"
-                        password="123456">
+        <jdbcConnection driverClass="com.clickhouse.jdbc.ClickHouseDriver"
+                        connectionURL="jdbc:clickhouse://172.171.2.111:8123/idc"
+                        userId=""
+                        password="">
             <property name="nullCatalogMeansCurrent" value="true"/>
         </jdbcConnection>
 
@@ -47,8 +65,8 @@
 
         <!-- targetPackage：生成的实体类所在的包 -->
         <!-- targetProject：生成的实体类所在的硬盘位置 -->
-        <javaModelGenerator targetPackage="cn.xgl.mbg.model"
-                            targetProject="src/test/java">
+        <javaModelGenerator targetPackage="cn.fnii.cloud.model.vo"
+                            targetProject="\src\main\java">
             <!-- 是否允许子包 -->
             <property name="enableSubPackages" value="false"/>
             <!-- 是否对modal添加构造函数 -->
@@ -60,30 +78,29 @@
         </javaModelGenerator>
         <!-- targetPackage 和 targetProject：生成的 mapper 文件的包和位置 -->
         <sqlMapGenerator targetPackage="mapper"
-                         targetProject="src/test/resources">
+                         targetProject="\src\main\resources">
             <!-- 针对数据库的一个配置，是否把 schema 作为字包名 -->
             <property name="enableSubPackages" value="false"/>
         </sqlMapGenerator>
         <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
         <javaClientGenerator type="XMLMAPPER"
-                             targetPackage="cn.xgl.mbg.dao"
-                             targetProject="src/test/java">
+                             targetPackage="cn.fnii.cloud.dao.clickHouse"
+                             targetProject="\src\main\java">
             <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为字包名 -->
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
 
-        <javaServiceGenerator targetPackage="cn.xgl.mbg.service"
-                              implementationPackage="cn.xgl.mbg.service.impl"
-                              targetProject="src/test/java"/>
+        <javaServiceGenerator targetPackage="cn.fnii.cloud.service"
+                              targetProject="\src\main\java"/>
 
-        <javaControllerGenerator targetPackage="cn.xgl.mbg.controller"
-                              targetProject="src/test/java">
-            <property name="swagger_open" value="true"/>
+        <javaControllerGenerator targetPackage="cn.fnii.cloud.controller"
+                              targetProject="\src\main\java">
+            <property name="swagger_open" value="false"/>
         </javaControllerGenerator>
 
         <!-- tableName是数据库中的表名，domainObjectName是生成的JAVA模型名，后面的参数不用改，要生成更多的表就在下面继续加table标签 -->
-        <table tableName="user" domainObjectName="User" enableCountByExample="false" enableDeleteByExample="false" enableSelectByExample="false"
-        enableUpdateByExample="false" selectByExampleQueryId="false" >
+        <table schema="idc" tableName="idc_busi" domainObjectName="IdcBusi" enableUpdateByExample="false" enableSelectByExample="false"
+        enableDeleteByExample="false" enableCountByExample="false">
         </table>
     </context>
 </generatorConfiguration>

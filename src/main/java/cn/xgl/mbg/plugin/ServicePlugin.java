@@ -1,13 +1,21 @@
 package cn.xgl.mbg.plugin;
 
+import cn.xgl.mbg.cache.CommArgs;
 import cn.xgl.mbg.config.ContextOverride;
 import cn.xgl.mbg.config.JavaServiceGeneratorConfiguration;
+import cn.xgl.mbg.config.comment.CommentGeneratorOverride;
+import cn.xgl.mbg.enums.PageMethodEnum;
+import cn.xgl.mbg.util.FullyQualifiedJavaTypeUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.mybatis.generator.api.CommentGenerator;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +25,9 @@ import java.util.stream.Stream;
  * @Author: xgl
  * @Date: 2022/10/26 10:14
  */
+@Slf4j
 public class ServicePlugin extends PluginAdapter {
+    @Override
     public boolean validate(List<String> list) {
         return true;
     }
@@ -27,23 +37,27 @@ public class ServicePlugin extends PluginAdapter {
      */
     @Override
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) {
+        log.info("执行service开始》》》》》》》》》》》》》》》》》》》》》》》》》》》》》");
 
         ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
 
+        CommentGeneratorOverride commentGenerator = (CommentGeneratorOverride)context.getCommentGenerator();
+
         JavaServiceGeneratorConfiguration serviceGeneratorConfiguration;//service 层 属性
 
-        if ((serviceGeneratorConfiguration = context.getJavaServiceGeneratorConfiguration()) == null)
+        if ((serviceGeneratorConfiguration = context.getJavaServiceGeneratorConfiguration()) == null) {
             return null;
+        }
 
         String targetPackage = serviceGeneratorConfiguration.getTargetPackage();//service 包
         String targetProject = serviceGeneratorConfiguration.getTargetProject();//service 项目地址
         String implementationPackage = serviceGeneratorConfiguration.getImplementationPackage();//service 实现类 包
 
         //增加 service 接口
-        CompilationUnit addServiceInterface = addServiceInterface(introspectedTable, targetPackage);
+        CompilationUnit addServiceInterface = addServiceInterface(introspectedTable, targetPackage,commentGenerator);
         //增加service 实现类
         CompilationUnit addServiceImplClazz = addServiceImplClazz(introspectedTable, targetPackage,
-                implementationPackage);
+                implementationPackage,commentGenerator);
 
         //生成service 接口 Java文件
         GeneratedJavaFile gjfServiceInterface = new GeneratedJavaFile(addServiceInterface, targetProject,
@@ -52,9 +66,14 @@ public class ServicePlugin extends PluginAdapter {
         GeneratedJavaFile gjfServiceImplClazz = new GeneratedJavaFile(addServiceImplClazz, targetProject,
                 this.context.getProperty("javaFileEncoding"), this.context.getJavaFormatter());
 
+        //commentGenerator.addClassComment(addServiceImplClazz,introspectedTable);
+        commentGenerator.addServiceClassComment((TopLevelClass)addServiceImplClazz,introspectedTable);
+
         List<GeneratedJavaFile> list = new ArrayList<>();
         list.add(gjfServiceInterface);
         list.add(gjfServiceImplClazz);
+        CommArgs.addAllGeneratedJavaFile(list);
+        log.info("执行service结束《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《《");
         return list;
     }
 
@@ -62,9 +81,10 @@ public class ServicePlugin extends PluginAdapter {
      * 生成service 接口 编译单元
      * @param introspectedTable 存储表信息
      * @param targetPackage 目标包
+     * @param commentGenerator
      * @return service 层接口
      */
-    protected CompilationUnit addServiceInterface(IntrospectedTable introspectedTable, String targetPackage) {
+    protected CompilationUnit addServiceInterface(IntrospectedTable introspectedTable, String targetPackage, CommentGeneratorOverride commentGenerator) {
 
         String entityClazzType = introspectedTable.getBaseRecordType();//获取表 对应得 Java 类型 即Java对象名
 
@@ -108,7 +128,7 @@ public class ServicePlugin extends PluginAdapter {
                 .toString();
 
 
-        this.additionalServiceMethods(introspectedTable, serviceInterface,mapperName);//生成service 层方法
+        this.additionalServiceMethods(introspectedTable, serviceInterface,mapperName,commentGenerator);//生成service 层方法
         return serviceInterface;
     }
 
@@ -117,10 +137,11 @@ public class ServicePlugin extends PluginAdapter {
      * @param introspectedTable 存储表信息
      * @param targetPackage 目标包
      * @param implementationPackage 实现类包
+     * @param commentGenerator
      * @return service 层实现类
      */
     protected CompilationUnit addServiceImplClazz(IntrospectedTable introspectedTable, String targetPackage,
-                                                  String implementationPackage) {
+                                                  String implementationPackage, CommentGeneratorOverride commentGenerator) {
 
         String entityClazzType = introspectedTable.getBaseRecordType();
         String entityExampleClazzType = introspectedTable.getExampleType();
@@ -205,19 +226,24 @@ public class ServicePlugin extends PluginAdapter {
      * @param introspectedTable 表信息
      * @param serviceInterface service 接口
      * @param mapperName mapper 名称
+     * @param commentGenerator
      */
     protected void additionalServiceMethods(IntrospectedTable introspectedTable, Interface serviceInterface,
-                                            String mapperName) {
+                                            String mapperName, CommentGeneratorOverride commentGenerator) {
 
         /*if (this.notHasBLOBColumns(introspectedTable))
             return;*/
 
-        introspectedTable.getGeneratedJavaFiles().stream().filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(
-                mapperName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
-                compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(
+        CommArgs.getGeneratedJavaFiles(introspectedTable).stream()
+                .filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(mapperName))
+                .map(GeneratedJavaFile::getCompilationUnit)
+                .forEach(compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(
                         m -> {
-                            m.setAbstract(true);//抽象类
-                            serviceInterface.addMethod(this.additionalServiceLayerMethod(serviceInterface, m));
+                            //判断是否是分页方法
+                            boolean pageMethod = judgePageMethod(m);
+                            Method method = this.additionalServiceLayerMethod(serviceInterface, m, true, pageMethod);
+                            commentGenerator.addGeneralMethodComment(method,introspectedTable);
+                            serviceInterface.addMethod(method);
                         }));
     }
 
@@ -233,13 +259,14 @@ public class ServicePlugin extends PluginAdapter {
         /*if (this.notHasBLOBColumns(introspectedTable))
             return;*/
 
-        introspectedTable.getGeneratedJavaFiles().stream().filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(
+        CommArgs.getGeneratedJavaFiles(introspectedTable).stream().filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(
                 mapperName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
                 compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(m -> {
-                    m.setAbstract(false);
-                    Method serviceImplMethod = this.additionalServiceLayerMethod(clazz, m);
+                    //判断是否是分页方法
+                    boolean pageMethod = judgePageMethod(m);
+                    Method serviceImplMethod = this.additionalServiceLayerMethod(clazz, m, false, pageMethod);
                     serviceImplMethod.addAnnotation("@Override");
-                    serviceImplMethod.addBodyLine(this.generateBodyForServiceImplMethod(mapperName, m));
+                    serviceImplMethod.addBodyLine(this.generateBodyForServiceImplMethod(mapperName, m, pageMethod));
 
                     clazz.addMethod(serviceImplMethod);
                 }));
@@ -254,13 +281,14 @@ public class ServicePlugin extends PluginAdapter {
      * 生成 方法
      * @param compilation 类信息 编译单元
      * @param m mapper方法
+     * @param pageMethod
      * @return 方法
      */
-    private Method additionalServiceLayerMethod(CompilationUnit compilation, Method m) {
+    private Method additionalServiceLayerMethod(CompilationUnit compilation, Method m,boolean isAbstract, boolean pageMethod) {
 
         Method method = new Method(m.getName());
         method.setVisibility(JavaVisibility.PUBLIC);
-        method.setAbstract(m.isAbstract());
+        method.setAbstract(isAbstract);
 
         List<Parameter> parameters = m.getParameters();
 
@@ -273,37 +301,90 @@ public class ServicePlugin extends PluginAdapter {
                 collect(Collectors.toSet()));
 
         //方法设置返回值
-        method.setReturnType(m.getReturnType().orElse(null));
+        //判断是否是分页方法
+        if(pageMethod){
+            FullyQualifiedJavaType fullyQualifiedJavaType = new FullyQualifiedJavaType(FullyQualifiedJavaTypeUtils.pageReturnType);
+            if(m.getReturnType().isPresent()){
+                List<FullyQualifiedJavaType> typeArguments = m.getReturnType().get().getTypeArguments();
+                for (FullyQualifiedJavaType typeArgument : typeArguments) {
+                    fullyQualifiedJavaType.addTypeArgument(typeArgument);
+                }
+            }
+            method.setReturnType(fullyQualifiedJavaType);
+        }else {
+            method.setReturnType(m.getReturnType().orElse(null));
+        }
+
         //导入返回值类型
-        if(m.getReturnType().isPresent()){
+        if(method.getReturnType().isPresent()){
             compilation.addImportedType(
-                    new FullyQualifiedJavaType(m.getReturnType().get().getFullyQualifiedNameWithoutTypeParameters()));
+                    new FullyQualifiedJavaType(method.getReturnType().get().getFullyQualifiedNameWithoutTypeParameters()));
         }
         return method;
+    }
+
+    /**
+     * 判断是否是分页方法
+     * 方法名相同 方法中包含分页参数 确定为分页方法
+     * @param method 方法
+     * @return true 分页方法
+     */
+    private boolean judgePageMethod(Method method) {
+        String methodName = method.getName();
+        //通过方法名获取 分页枚举类 下的所有参数
+        Parameter[] pageArgs = PageMethodEnum.getPageArgByMethodName(methodName);
+        if (pageArgs.length > 0) {
+            List<Parameter> parameters = method.getParameters();
+            if (CollectionUtils.isEmpty(parameters)) {
+                return false;
+            }
+            //判断当前方法参数是否包含枚举类中当前方法名下的所有参数
+            //flag 判断是否包含全部的标识符
+            boolean flag = true;
+            List<String> paramToString = parameters.stream().flatMap(parameter -> Stream.of(parameter.toString())).collect(Collectors.toList());
+            for (Parameter pageArg : pageArgs) {
+                if (!paramToString.contains(pageArg.toString())) {
+                    flag = false;
+                    break;
+                }
+            }
+            return flag;
+        }
+        return false;
     }
 
     /**
      * 生成方法 body 方法体
      * @param mapperName mapper 名称
      * @param m mapper 方法
+     * @param pageMethod 分页标志位
      * @return 方法体
      */
-    private String generateBodyForServiceImplMethod(String mapperName, Method m) {
+    private String generateBodyForServiceImplMethod(String mapperName, Method m, boolean pageMethod) {
         StringBuilder sbf = new StringBuilder("return ");
+        if(pageMethod){
+            sbf.append("new PageInfo<>(");
+        }
         sbf.append(mapperName).append(".").append(m.getName()).append("(");
 
         boolean singleParam = true;
         for (Parameter parameter : m.getParameters()) {
 
-            if (singleParam)
+            if (singleParam) {
                 singleParam = false;
-            else
+            } else {
                 sbf.append(", ");
+            }
             sbf.append(parameter.getName());
 
         }
 
-        sbf.append(");");
+        sbf.append(")");
+        if(pageMethod){
+            sbf.append(");");
+        }else{
+            sbf.append(";");
+        }
         return sbf.toString();
     }
 }

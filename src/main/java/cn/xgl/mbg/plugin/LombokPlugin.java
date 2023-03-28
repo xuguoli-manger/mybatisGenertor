@@ -17,10 +17,12 @@ public class LombokPlugin extends PluginAdapter {
     public LombokPlugin() {
     }
 
+    @Override
     public boolean validate(List<String> list) {
         return true;
     }
 
+    @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         if(properties.isEmpty()){
             topLevelClass.addAnnotation("@Data");
@@ -35,15 +37,12 @@ public class LombokPlugin extends PluginAdapter {
                 properties.remove("Value");
             }
             properties.forEach((key, value) -> {
-                if(value.equals("true")){
+                if("true".equals(value)){
                     topLevelClass.addAnnotation("@"+key);
                 }
             });
             topLevelClass.addImportedType("lombok.*");
         }
-        topLevelClass.addJavaDocLine("/**");
-        topLevelClass.addJavaDocLine("* Created by Mybatis Generator " + this.date2Str(new Date()));
-        topLevelClass.addJavaDocLine("*/");
         return true;
     }
 
@@ -54,10 +53,12 @@ public class LombokPlugin extends PluginAdapter {
         return true;
     }
 
+    @Override
     public boolean modelSetterMethodGenerated(Method method, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn, IntrospectedTable introspectedTable, ModelClassType modelClassType) {
         return false;
     }
 
+    @Override
     public boolean modelGetterMethodGenerated(Method method, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn, IntrospectedTable introspectedTable, ModelClassType modelClassType) {
         return false;
     }

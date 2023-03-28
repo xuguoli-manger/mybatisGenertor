@@ -148,7 +148,7 @@
         <!ELEMENT javaServiceGenerator (property*)>
         <!ATTLIST javaServiceGenerator
                 targetPackage CDATA #REQUIRED
-                implementationPackage CDATA #REQUIRED
+                implementationPackage CDATA #IMPLIED
                 targetProject CDATA #REQUIRED>
 
         <!ELEMENT javaControllerGenerator (property*)>

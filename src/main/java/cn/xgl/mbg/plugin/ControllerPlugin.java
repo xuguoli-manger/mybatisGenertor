@@ -1,13 +1,18 @@
 package cn.xgl.mbg.plugin;
 
+import cn.xgl.mbg.cache.CommArgs;
 import cn.xgl.mbg.config.ContextOverride;
 import cn.xgl.mbg.config.JavaControllerGeneratorConfiguration;
 import cn.xgl.mbg.config.JavaServiceGeneratorConfiguration;
+import cn.xgl.mbg.enums.MethodRemark;
+import cn.xgl.mbg.util.PropertyUtils;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.internal.util.StringUtility;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,8 +29,7 @@ public class ControllerPlugin extends PluginAdapter {
 
     private static Boolean SWAGGER_API_SWITCH = false;
 
-    private static final String SWAGGER_OPEN = "swagger_open";
-
+    @Override
     public boolean validate(List<String> list) {
         return true;
     }
@@ -43,8 +47,9 @@ public class ControllerPlugin extends PluginAdapter {
         JavaServiceGeneratorConfiguration serviceGeneratorConfiguration;//service 层 属性
 
         //controller 层 必须在service 层 存在才生成
-        if ((serviceGeneratorConfiguration = context.getJavaServiceGeneratorConfiguration()) == null || (controllerGeneratorConfiguration = context.getJavaControllerGeneratorConfiguration()) == null)
+        if ((serviceGeneratorConfiguration = context.getJavaServiceGeneratorConfiguration()) == null || (controllerGeneratorConfiguration = context.getJavaControllerGeneratorConfiguration()) == null) {
             return null;
+        }
 
         //设置swagger 开关
         setSwagger(introspectedTable);
@@ -64,6 +69,7 @@ public class ControllerPlugin extends PluginAdapter {
 
         List<GeneratedJavaFile> list = new ArrayList<>();
         list.add(gjfControllerClazz);
+        CommArgs.addAllGeneratedJavaFile(list);
         return list;
     }
 
@@ -143,22 +149,22 @@ public class ControllerPlugin extends PluginAdapter {
         //设置swagger api
         setApi(controllerClazz,introspectedTable);
 
-        //mapper 接口 名称
-        String mapperName = builder.delete(0, builder.length())
-                .append(domainObjectName)
-                .append("Mapper")
-                .toString();
-
         //service 接口 名称
         String serviceInterfaceName = builder.delete(0, builder.length())
-                .append(Character.toLowerCase(domainObjectName.charAt(0)))
-                .append(domainObjectName.substring(1))
+                .append("I")
                 .append(domainObjectName)
                 .append("Service")
                 .toString();
 
+        //service 接口 引用名称 reference
+        String serviceInterfaceReferenceName = builder.delete(0, builder.length())
+                .append(Character.toLowerCase(domainObjectName.charAt(0)))
+                .append(domainObjectName.substring(1))
+                .append("Service")
+                .toString();
+
         //service 接口 类型
-        FullyQualifiedJavaType JavaServiceInterfaceType = new FullyQualifiedJavaType(
+        FullyQualifiedJavaType javaServiceInterfaceType = new FullyQualifiedJavaType(
                 builder.delete(0, builder.length())
                 .append(serviceTargetPackage)
                 .append(".")
@@ -168,16 +174,16 @@ public class ControllerPlugin extends PluginAdapter {
                 .toString());
 
         //引入service bean
-        Field mapperField = new Field(serviceInterfaceName,JavaServiceInterfaceType);
+        Field mapperField = new Field(serviceInterfaceReferenceName,javaServiceInterfaceType);
         mapperField.setVisibility(JavaVisibility.PRIVATE);
         mapperField.addAnnotation("@Autowired");
         controllerClazz.addField(mapperField);
-        controllerClazz.addImportedType(JavaServiceInterfaceType);
+        controllerClazz.addImportedType(javaServiceInterfaceType);
         controllerClazz
                 .addImportedType(new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired"));
 
         //生成controller 方法
-        this.additionalControllerMethods(introspectedTable, controllerClazz, serviceInterfaceName, mapperName);
+        this.additionalControllerMethods(introspectedTable, controllerClazz, serviceInterfaceReferenceName, serviceInterfaceName);
 
         return controllerClazz;
     }
@@ -186,21 +192,21 @@ public class ControllerPlugin extends PluginAdapter {
      * controller 方法
      * @param introspectedTable 表信息
      * @param clazz service 实现类
-     * @param serviceInterfaceName mapper 名称
+     * @param serviceInterfaceReferenceName service接口 引用名称
+     * @param serviceInterfaceName service接口 名称
      */
     protected void additionalControllerMethods(IntrospectedTable introspectedTable, TopLevelClass clazz,
-                                                String serviceInterfaceName,String mapperName) {
+                                                String serviceInterfaceReferenceName,String serviceInterfaceName) {
 
         /*if (this.notHasBLOBColumns(introspectedTable))
             return;*/
 
-        introspectedTable.getGeneratedJavaFiles().stream().filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(
-                mapperName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
+        CommArgs.getGeneratedJavaFiles(introspectedTable).stream().filter(file -> file.getCompilationUnit().getType().getShortName().equalsIgnoreCase(
+                serviceInterfaceName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
                 compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(m -> {
-                    m.setAbstract(false);
-                    Method controllerMethod = this.additionalControllerLayerMethod(clazz, m);
+                    Method controllerMethod = this.additionalControllerLayerMethod(clazz, m, false);
                     controllerMethod.addAnnotation("@RequestMapping(\"/"+m.getName()+"\")");
-                    controllerMethod.addBodyLine(this.generateBodyForControllerMethod(serviceInterfaceName, controllerMethod));
+                    controllerMethod.addBodyLine(this.generateBodyForControllerMethod(serviceInterfaceReferenceName, controllerMethod));
 
                     clazz.addMethod(controllerMethod);
                 }));
@@ -217,11 +223,11 @@ public class ControllerPlugin extends PluginAdapter {
      * @param m mapper方法
      * @return 方法
      */
-    private Method additionalControllerLayerMethod(CompilationUnit compilation, Method m) {
+    private Method additionalControllerLayerMethod(CompilationUnit compilation, Method m, boolean isAbstract) {
 
         Method method = new Method(m.getName());
         method.setVisibility(JavaVisibility.PUBLIC);
-        method.setAbstract(m.isAbstract());
+        method.setAbstract(isAbstract);
 
         List<Parameter> parameters = m.getParameters();
 
@@ -268,10 +274,11 @@ public class ControllerPlugin extends PluginAdapter {
         boolean singleParam = true;
         for (Parameter parameter : m.getParameters()) {
 
-            if (singleParam)
+            if (singleParam) {
                 singleParam = false;
-            else
+            } else {
                 sbf.append(", ");
+            }
             sbf.append(parameter.getName());
 
         }
@@ -309,7 +316,7 @@ public class ControllerPlugin extends PluginAdapter {
 
     private void setApiOperation(CompilationUnit compilation, Method method) {
         if(SWAGGER_API_SWITCH){
-            method.addAnnotation("@ApiOperation(value =\""+MethodRemark.getRemarkByMethodName(method.getName())+"\")");
+            method.addAnnotation("@ApiOperation(value =\""+ MethodRemark.getRemarkByMethodName(method.getName())+"\")");
             compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiOperation"));
         }
     }
@@ -325,9 +332,7 @@ public class ControllerPlugin extends PluginAdapter {
     private void setSwagger(IntrospectedTable introspectedTable) {
         ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
         JavaControllerGeneratorConfiguration controllerGeneratorConfiguration = context.getJavaControllerGeneratorConfiguration();
-        if(controllerGeneratorConfiguration.getProperties().getProperty(SWAGGER_OPEN) != null){
-            SWAGGER_API_SWITCH = "true".equals(controllerGeneratorConfiguration.getProperties().getProperty(SWAGGER_OPEN));
-        }
+        SWAGGER_API_SWITCH = StringUtility.isTrue(controllerGeneratorConfiguration.getProperties().getProperty(PropertyUtils.SWAGGER_OPEN));
     }
 
     private void setRemarks(IntrospectedTable introspectedTable){
@@ -340,41 +345,4 @@ public class ControllerPlugin extends PluginAdapter {
         }
     }
 
-
-    private enum MethodRemark{
-        deleteByPrimaryKey("通过主键删除"),
-        insert("插入"),
-        insertSelective("选择性插入"),
-        selectAll("查询全部"),
-        selectByPrimaryKey("通过主键查询"),
-        updateByPrimaryKeySelective("通过主键修改部分数据"),
-        updateByPrimaryKey("通过主键修改全部数据"),
-        updateByPrimaryKeyWithBLOBs("通过主键修改blob数据"),
-        countByExample("根据条件查询条目数"),
-        deleteByExample("根据条件删除"),
-        selectByExample("根据条件查询"),
-        updateByExample("根据条件修改"),
-        updateByExampleSelective("根据条件部分修改"),
-        updateByExampleWithBLOBs("根据条件修改blob字段"),
-        selectByExampleWithBLOBs("根据条件查询blob"),
-        ;
-
-        private String remark;
-
-        MethodRemark( String remark) {
-            this.remark = remark;
-        }
-
-        public String getRemark() {
-            return remark;
-        }
-
-        public static String getRemarkByMethodName(String methodName){
-            try {
-                return MethodRemark.valueOf(methodName).remark;
-            } catch (IllegalArgumentException e) {
-                return methodName;
-            }
-        }
-    }
 }
