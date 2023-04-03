@@ -2,6 +2,7 @@ package cn.xgl.mbg.plugin;
 
 import cn.xgl.mbg.cache.CommArgs;
 import cn.xgl.mbg.config.ContextOverride;
+import cn.xgl.mbg.enums.PageArgsEnum;
 import cn.xgl.mbg.enums.PageMethodEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.ArrayUtil;
@@ -111,7 +112,7 @@ public class DaoPlugin extends PluginAdapter {
             }
         }
         //设置分页参数
-        Parameter[] pageArgs = pageMethodEnum.getPageArgs();
+        Parameter[] pageArgs = PageArgsEnum.getPageArgs();
         if(pageArgs.length > 0){
             for (Parameter pageArg : pageArgs) {
                 method.addParameter(new Parameter(pageArg.getType(),pageArg.getName()));

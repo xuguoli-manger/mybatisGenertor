@@ -21,4 +21,18 @@ public interface PropertyUtils {
 
     String SWAGGER_OPEN = "swagger_open";
 
+    String ADD_PRIMARY_KEY = "addPrimaryKey";
+
+    String ADD_PAGE_METHOD = "addPageMethod";
+
+    String ADD_SELECT_LIST_METHOD = "addSelectListMethod";
+
+    String ADD_WHERE_SQL = "addWhereSql";
+
+    String ADD_ORDER_BY_SQL = "addOrderBySql";
+
+    String ADD_LIMIT_SQL = "addLimitSql";
+
+    String ADD_DTO_MODEL = "addDtoModel";
+
 }

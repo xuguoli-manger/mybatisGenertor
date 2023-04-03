@@ -7,7 +7,17 @@
     <!-- targetRuntime：设置生成的文件适用于那个 mybatis 版本 -->
     <context id="default" targetRuntime="MyBatis3" defaultModelType="flat">
 
-        <property name="targetProjectPath" value="D:\git\cloud-demo\service-demo"/>
+        <property name="targetProjectPath" value="F:\git\cloud-demo\service-demo"/>
+        <!--全局开启SelectListMethod-->
+        <property name="addSelectListMethod" value="true"/>
+        <!--全局开启分页方法-->
+        <property name="addPageMethod" value="true"/>
+        <!--全局开启whereSql语句-->
+        <property name="addWhereSql" value="true"/>
+        <!--全局开启orderBySql语句-->
+        <property name="addOrderBySql" value="true"/>
+        <!--全局开启limitSql语句-->
+        <property name="addLimitSql" value="true"/>
 
         <plugin type="cn.xgl.mbg.plugin.LombokPlugin">
             <property name="Data" value="true"/>
@@ -17,29 +27,38 @@
             <property name="EqualsAndHashCode" value="true"/>
         </plugin>
 
+        <plugin type="cn.xgl.mbg.plugin.DtoModelPlugin"/>
+
+        <plugin type="org.mybatis.generator.plugins.VirtualPrimaryKeyPlugin"/>
+        <plugin type="cn.xgl.mbg.plugin.AddLimitSqlPlugin"/>
+        <plugin type="cn.xgl.mbg.plugin.AddOrderBySqlPlugin"/>
+        <plugin type="cn.xgl.mbg.plugin.WhereCasePlugin"/>
+        <!--增加selectForList(Map<String, Object> param)查询方法-->
+        <plugin type="cn.xgl.mbg.plugin.AddSelectListPlugin"/>
         <!--xml文件生成默认是合并 这里进行关闭-->
-        <plugin type="cn.xgl.mbg.plugin.OverWriteXmlPlugin"/>
-        <plugin type="cn.xgl.mbg.plugin.DaoPlugin">
-            <property name="pageMethod" value="true"/>
-        </plugin>
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
+        <!--增加分页方法-->
+        <plugin type="cn.xgl.mbg.plugin.AddPageMethodPlugin"/>
         <plugin type="cn.xgl.mbg.plugin.ServicePlugin"/>
         <plugin type="cn.xgl.mbg.plugin.ControllerPlugin"/>
 
-        <!--optional,指在创建class时，对注释进行控制-->
+        <!--commentGenerator,指在创建class时，对注释进行控制-->
         <commentGenerator type="cn.xgl.mbg.plugin.MyCommentGenerator">
             <property name="suppressDate" value="false"/>
             <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
             <property name="suppressAllComments" value="false"/>
+            <!--注释生成的时间格式-->
+            <property name="dateFormat" value="yyyy-MM-dd HH"/>
             <!--作者-->
             <property name="author" value="xgl"/>
             <!--项目版本号-->
             <property name="version" value="0.0.1-SNAPSHOT"/>
-            <!--controller 注释全部开启-->
-            <property name="controllerAllComments" value="true"/>
-            <!--controller 方法注释关闭-->
-            <!--<property name="controllerMethodComments" value="false"/>-->
-            <!--service 注释全部开启-->
-            <property name="serviceAllComments" value="true"/>
+            <!--controller 注释全部关闭 true：关闭 -->
+            <property name="controllerAllComments" value="false"/>
+            <!--controller 方法注释关闭 true：关闭-->
+            <!--<property name="controllerMethodComments" value="true"/>-->
+            <!--service 注释全部关闭 true：关闭-->
+            <property name="serviceAllComments" value="false"/>
 
         </commentGenerator>
 
@@ -56,16 +75,22 @@
                         connectionURL="jdbc:sqlite:D:\sqlite\tums\tums.db">
         </jdbcConnection>-->
         <!--非必须，类型处理器，在数据库类型和java类型之间的转换控制-->
+        <!--默认实现类 org.mybatis.generator.internal.types.JavaTypeResolverDefaultImpl-->
         <javaTypeResolver>
-            <!-- 默认情况下数据库中的 decimal，bigInt 在 Java 对应是 sql 下的 BigDecimal 类 -->
-            <!-- 不是 double 和 long 类型 -->
-            <!-- 使用常用的基本类型代替 sql 包下的引用类型 -->
+            <!-- true 情况下数据库中的 DECIMAL，NUMERIC 在 Java 对应是 sql 下的 BigDecimal 类 -->
+            <!--false 按数据库字段长度和精度来对应
+            精度>0或者长度>18，就会使用java.math.BigDecimal
+            精度=0并且10<=长度<=18，就会使用java.lang.Long
+            精度=0并且5<=长度<=9，就会使用java.lang.Integer
+            精度=0并且长度<5，就会使用java.lang.Short-->
             <property name="forceBigDecimals" value="false"/>
+            <!--时间类型转换 true 为 java7新特性-->
+            <property name="useJSR310Types" value="true"/>
         </javaTypeResolver>
 
         <!-- targetPackage：生成的实体类所在的包 -->
         <!-- targetProject：生成的实体类所在的硬盘位置 -->
-        <javaModelGenerator targetPackage="cn.fnii.cloud.model.vo"
+        <javaModelGenerator targetPackage="cn.fnii.cloud.model"
                             targetProject="\src\main\java">
             <!-- 是否允许子包 -->
             <property name="enableSubPackages" value="false"/>
@@ -84,7 +109,7 @@
         </sqlMapGenerator>
         <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
         <javaClientGenerator type="XMLMAPPER"
-                             targetPackage="cn.fnii.cloud.dao.clickHouse"
+                             targetPackage="cn.fnii.cloud.mapper.clickHouse"
                              targetProject="\src\main\java">
             <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为字包名 -->
             <property name="enableSubPackages" value="false"/>
@@ -95,12 +120,14 @@
 
         <javaControllerGenerator targetPackage="cn.fnii.cloud.controller"
                               targetProject="\src\main\java">
-            <property name="swagger_open" value="false"/>
+            <property name="swagger_open" value="true"/>
         </javaControllerGenerator>
 
         <!-- tableName是数据库中的表名，domainObjectName是生成的JAVA模型名，后面的参数不用改，要生成更多的表就在下面继续加table标签 -->
         <table schema="idc" tableName="idc_busi" domainObjectName="IdcBusi" enableUpdateByExample="false" enableSelectByExample="false"
-        enableDeleteByExample="false" enableCountByExample="false">
+        enableDeleteByExample="false" enableCountByExample="false" >
+            <property name="virtualKeyColumns" value="daytime,business_id,province"/>
+            <property name="addDtoModel" value="true"/>
         </table>
     </context>
 </generatorConfiguration>

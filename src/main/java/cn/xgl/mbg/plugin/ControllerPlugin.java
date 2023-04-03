@@ -4,8 +4,11 @@ import cn.xgl.mbg.cache.CommArgs;
 import cn.xgl.mbg.config.ContextOverride;
 import cn.xgl.mbg.config.JavaControllerGeneratorConfiguration;
 import cn.xgl.mbg.config.JavaServiceGeneratorConfiguration;
-import cn.xgl.mbg.enums.MethodRemark;
+import cn.xgl.mbg.enums.*;
+import cn.xgl.mbg.util.BasicTypeConvertUtils;
+import cn.xgl.mbg.util.FullyQualifiedJavaTypeUtils;
 import cn.xgl.mbg.util.PropertyUtils;
+import cn.xgl.mbg.util.SwaggerApiUtils;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -24,10 +27,6 @@ import java.util.stream.Stream;
  * @Date: 2022/10/26 10:14
  */
 public class ControllerPlugin extends PluginAdapter {
-
-    Map<String,Object> remarks = new HashMap<>();//存放 表注释 列 注释 主键是表和列的Java名称
-
-    private static Boolean SWAGGER_API_SWITCH = false;
 
     @Override
     public boolean validate(List<String> list) {
@@ -52,9 +51,9 @@ public class ControllerPlugin extends PluginAdapter {
         }
 
         //设置swagger 开关
-        setSwagger(introspectedTable);
+        SwaggerApiUtils.setSwagger(introspectedTable);
         //设置字段注释
-        setRemarks(introspectedTable);
+        SwaggerApiUtils.setRemarks(introspectedTable);
 
         String targetPackage = controllerGeneratorConfiguration.getTargetPackage();//controller 包
         String targetProject = controllerGeneratorConfiguration.getTargetProject();//controller 项目地址
@@ -79,8 +78,8 @@ public class ControllerPlugin extends PluginAdapter {
         if(validate(topLevelClass,introspectedTable)){
             return true;
         }
-        setSwagger(introspectedTable);
-        setApiModelProperty(field, topLevelClass, introspectedColumn);
+        SwaggerApiUtils.setSwagger(introspectedTable);
+        SwaggerApiUtils.setApiModelProperty(field, topLevelClass, introspectedColumn);
         return true;
     }
 
@@ -89,8 +88,8 @@ public class ControllerPlugin extends PluginAdapter {
         if(validate(topLevelClass,introspectedTable)){
             return true;
         }
-        setSwagger(introspectedTable);
-        setApiModel(topLevelClass, introspectedTable);
+        SwaggerApiUtils.setSwagger(introspectedTable);
+        SwaggerApiUtils.setApiModel(topLevelClass, introspectedTable);
         return true;
     }
 
@@ -99,8 +98,8 @@ public class ControllerPlugin extends PluginAdapter {
         if(validate(topLevelClass,introspectedTable)){
             return true;
         }
-        setSwagger(introspectedTable);
-        setApiModel(topLevelClass, introspectedTable);
+        SwaggerApiUtils.setSwagger(introspectedTable);
+        SwaggerApiUtils.setApiModel(topLevelClass, introspectedTable);
         return true;
     }
 
@@ -109,8 +108,8 @@ public class ControllerPlugin extends PluginAdapter {
         if(validate(topLevelClass,introspectedTable)){
             return true;
         }
-        setSwagger(introspectedTable);
-        setApiModel(topLevelClass, introspectedTable);
+        SwaggerApiUtils.setSwagger(introspectedTable);
+        SwaggerApiUtils.setApiModel(topLevelClass, introspectedTable);
         return true;
     }
 
@@ -144,10 +143,13 @@ public class ControllerPlugin extends PluginAdapter {
         controllerClazz
                 .addImportedType(new FullyQualifiedJavaType("org.springframework.beans.factory.annotation.Autowired"));
         controllerClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.web.bind.annotation.RestController"));
-        controllerClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.web.bind.annotation.RequestMapping"));
+        controllerClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.web.bind.annotation.*"));
+        controllerClazz.addImportedType(new FullyQualifiedJavaType("org.springframework.web.bind.annotation.RequestParam"));
+        controllerClazz.addImportedType(FullyQualifiedJavaTypeEnum.RESULT_CODE_UTIL_TYPE.getJavaType());
+        controllerClazz.addImportedType(FullyQualifiedJavaTypeEnum.COMM_RESULT_TYPE.getJavaType());
 
         //设置swagger api
-        setApi(controllerClazz,introspectedTable);
+        SwaggerApiUtils.setApi(controllerClazz,introspectedTable);
 
         //service 接口 名称
         String serviceInterfaceName = builder.delete(0, builder.length())
@@ -205,11 +207,16 @@ public class ControllerPlugin extends PluginAdapter {
                 serviceInterfaceName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
                 compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(m -> {
                     Method controllerMethod = this.additionalControllerLayerMethod(clazz, m, false);
-                    controllerMethod.addAnnotation("@RequestMapping(\"/"+m.getName()+"\")");
+                    this.addMethodAnnotation(controllerMethod);
                     controllerMethod.addBodyLine(this.generateBodyForControllerMethod(serviceInterfaceReferenceName, controllerMethod));
 
                     clazz.addMethod(controllerMethod);
                 }));
+    }
+
+    private void addMethodAnnotation(Method controllerMethod) {
+        String methodName = controllerMethod.getName();
+        controllerMethod.addAnnotation(MethodRequestTypeEnum.getRequestTypeAnnotationByMethodName(methodName)+"(\"/"+ methodName +"\")");
     }
 
 
@@ -232,12 +239,19 @@ public class ControllerPlugin extends PluginAdapter {
         List<Parameter> parameters = m.getParameters();
 
         List<Parameter> params = new ArrayList<>();
+        List<Parameter> parameterList = new ArrayList<>(Arrays.asList(PageArgsEnum.getOrderByArgs()));
+        parameterList.addAll(Arrays.asList(PageArgsEnum.getLimitArgs()));
+        List<String> paramNames = parameterList.stream().flatMap(parameter1 -> Stream.of(parameter1.getName())).collect(Collectors.toList());
         parameters.forEach(parameter -> {
             if(parameter.getName().equals("row")){//row 在mybatis generator 生成参数中 代表生成的对象 参数名  这里替换为首字母小写 eg User row  User user
                 String name = parameter.getType().getShortName();
                 params.add(new Parameter(parameter.getType(),Character.toLowerCase(name.charAt(0))+name.substring(1)));
             }else{
-                params.add(parameter);
+                Parameter param = new Parameter(parameter.getType(), parameter.getName());
+                if(paramNames.contains(param.getName())){
+                    param.addAnnotation("@RequestParam(required = false)");
+                }
+                params.add(param);
             }
         });
 
@@ -248,16 +262,18 @@ public class ControllerPlugin extends PluginAdapter {
 
         //设置方法 参数
         method.getParameters().addAll(params.stream().peek(param ->
-                setApiParam(compilation,param)).collect(Collectors.toList()));
+                SwaggerApiUtils.setApiParam(compilation,param)).collect(Collectors.toList()));
 
-        //方法设置返回值
-        method.setReturnType(m.getReturnType().orElse(null));
-        //导入返回值类型
         if(m.getReturnType().isPresent()){
+            FullyQualifiedJavaType javaType = new FullyQualifiedJavaType(FullyQualifiedJavaTypeUtils.COMM_RESULT_TYPE);
+            javaType.addTypeArgument(BasicTypeConvertUtils.getJavaType(m.getReturnType().get()));
+            //方法设置返回值
+            method.setReturnType(javaType);
+            //导入返回值类型
             compilation.addImportedType(
                     new FullyQualifiedJavaType(m.getReturnType().get().getFullyQualifiedNameWithoutTypeParameters()));
         }
-        setApiOperation(compilation,method);
+        SwaggerApiUtils.setApiOperation(compilation,method);
         return method;
     }
 
@@ -269,7 +285,7 @@ public class ControllerPlugin extends PluginAdapter {
      */
     private String generateBodyForControllerMethod(String serviceInterfaceName, Method m) {
         StringBuilder sbf = new StringBuilder("return ");
-        sbf.append(serviceInterfaceName).append(".").append(m.getName()).append("(");
+        sbf.append(FullyQualifiedJavaTypeEnum.RESULT_CODE_UTIL_TYPE.getJavaTypeName()+".ok(").append(serviceInterfaceName).append(".").append(m.getName()).append("(");
 
         boolean singleParam = true;
         for (Parameter parameter : m.getParameters()) {
@@ -283,66 +299,13 @@ public class ControllerPlugin extends PluginAdapter {
 
         }
 
-        sbf.append(");");
+        sbf.append("));");
         return sbf.toString();
     }
 
     private boolean validate(TopLevelClass topLevelClass, IntrospectedTable introspectedTable){
         ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
-        //controller 层 必须在service 层 存在才生成
-        return context.getJavaControllerGeneratorConfiguration() == null;
+        //controller 层 必须存在才生成 存在dtoModel时 model层的swagger生成在dtoModel中
+        return context.getJavaControllerGeneratorConfiguration() != null || !StringUtility.isTrue(introspectedTable.getTableConfiguration().getProperty(PropertyUtils.ADD_DTO_MODEL));
     }
-
-    private void setApiModel(TopLevelClass topLevelClass, IntrospectedTable introspectedTable){
-        if(SWAGGER_API_SWITCH){
-            topLevelClass.addAnnotation("@ApiModel(value =\""+Optional.ofNullable(introspectedTable.getRemarks()).orElse(introspectedTable.getFullyQualifiedTable().getDomainObjectName())+"\")");
-            topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModel"));
-        }
-    }
-
-    private void setApi(TopLevelClass topLevelClass, IntrospectedTable introspectedTable){
-        if(SWAGGER_API_SWITCH){
-            topLevelClass.addAnnotation("@Api(tags =\""+introspectedTable.getRemarks()+"\")");
-            topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.Api"));
-        }
-    }
-
-    private void setApiModelProperty(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn) {
-        if(SWAGGER_API_SWITCH){
-            field.addAnnotation("@ApiModelProperty(value =\""+Optional.ofNullable(introspectedColumn.getRemarks()).orElse(introspectedColumn.getJavaProperty())+"\")");
-            topLevelClass.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiModelProperty"));
-        }
-    }
-
-    private void setApiOperation(CompilationUnit compilation, Method method) {
-        if(SWAGGER_API_SWITCH){
-            method.addAnnotation("@ApiOperation(value =\""+ MethodRemark.getRemarkByMethodName(method.getName())+"\")");
-            compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiOperation"));
-        }
-    }
-
-    private void setApiParam(CompilationUnit compilation, Parameter parameter) {
-        if(SWAGGER_API_SWITCH){
-            compilation.addImportedType(new FullyQualifiedJavaType("io.swagger.annotations.ApiParam"));
-            parameter.addAnnotation("@ApiParam(name=\""+parameter.getName()+"\"," +
-                    "value=\""+ Optional.ofNullable(remarks.get(parameter.getName())).orElse(parameter.getName())+"\")");
-        }
-    }
-
-    private void setSwagger(IntrospectedTable introspectedTable) {
-        ContextOverride context = (ContextOverride) introspectedTable.getContext();//获取content 属性
-        JavaControllerGeneratorConfiguration controllerGeneratorConfiguration = context.getJavaControllerGeneratorConfiguration();
-        SWAGGER_API_SWITCH = StringUtility.isTrue(controllerGeneratorConfiguration.getProperties().getProperty(PropertyUtils.SWAGGER_OPEN));
-    }
-
-    private void setRemarks(IntrospectedTable introspectedTable){
-        if(SWAGGER_API_SWITCH){
-            String name = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
-            remarks.put(Character.toLowerCase(name.charAt(0))+name.substring(1),introspectedTable.getRemarks());//存储表注释
-            introspectedTable.getPrimaryKeyColumns().forEach(introspectedColumn -> {//存储列注释
-                remarks.put(introspectedColumn.getJavaProperty(),introspectedColumn.getRemarks());
-            });
-        }
-    }
-
 }

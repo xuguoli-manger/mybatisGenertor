@@ -4,18 +4,20 @@ import cn.xgl.mbg.cache.CommArgs;
 import cn.xgl.mbg.config.ContextOverride;
 import cn.xgl.mbg.config.JavaServiceGeneratorConfiguration;
 import cn.xgl.mbg.config.comment.CommentGeneratorOverride;
+import cn.xgl.mbg.enums.FullyQualifiedJavaTypeEnum;
+import cn.xgl.mbg.enums.PageArgsEnum;
 import cn.xgl.mbg.enums.PageMethodEnum;
 import cn.xgl.mbg.util.FullyQualifiedJavaTypeUtils;
+import cn.xgl.mbg.util.PropertyUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.mybatis.generator.api.CommentGenerator;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
+import org.mybatis.generator.internal.util.StringUtility;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -240,10 +242,18 @@ public class ServicePlugin extends PluginAdapter {
                 .forEach(compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(
                         m -> {
                             //判断是否是分页方法
-                            boolean pageMethod = judgePageMethod(m);
-                            Method method = this.additionalServiceLayerMethod(serviceInterface, m, true, pageMethod);
-                            commentGenerator.addGeneralMethodComment(method,introspectedTable);
-                            serviceInterface.addMethod(method);
+                            boolean existDtoModel = StringUtility.isTrue(introspectedTable.getTableConfigurationProperty(PropertyUtils.ADD_DTO_MODEL));
+                            boolean pageMethod = judgePageMethod(m,introspectedTable, existDtoModel);
+                            if(pageMethod){
+                                Method method = this.additionalServiceLayerMethod(serviceInterface, m, true, true);
+                                commentGenerator.addGeneralMethodComment(method,introspectedTable);
+                                serviceInterface.addMethod(method);
+                            }
+                            if(!pageMethod || existDtoModel){
+                                Method method = this.additionalServiceLayerMethod(serviceInterface, m, true, false);
+                                commentGenerator.addGeneralMethodComment(method,introspectedTable);
+                                serviceInterface.addMethod(method);
+                            }
                         }));
     }
 
@@ -263,12 +273,21 @@ public class ServicePlugin extends PluginAdapter {
                 mapperName)).map(GeneratedJavaFile::getCompilationUnit).forEach(
                 compilationUnit -> ((Interface) compilationUnit).getMethods().forEach(m -> {
                     //判断是否是分页方法
-                    boolean pageMethod = judgePageMethod(m);
-                    Method serviceImplMethod = this.additionalServiceLayerMethod(clazz, m, false, pageMethod);
-                    serviceImplMethod.addAnnotation("@Override");
-                    serviceImplMethod.addBodyLine(this.generateBodyForServiceImplMethod(mapperName, m, pageMethod));
+                    boolean existDtoModel = StringUtility.isTrue(introspectedTable.getTableConfigurationProperty(PropertyUtils.ADD_DTO_MODEL));
+                    boolean pageMethod = judgePageMethod(m, introspectedTable,existDtoModel);
+                    if(pageMethod){
+                        Method serviceImplMethod = this.additionalServiceLayerMethod(clazz, m, false, true);
+                        serviceImplMethod.addAnnotation("@Override");
+                        serviceImplMethod.addBodyLine(this.generateBodyForServiceImplMethod(mapperName, m, true));
+                        clazz.addMethod(serviceImplMethod);
+                    }
+                    if(!pageMethod || existDtoModel){
+                        Method serviceImplMethod = this.additionalServiceLayerMethod(clazz, m, false, false);
+                        serviceImplMethod.addAnnotation("@Override");
+                        serviceImplMethod.addBodyLine(this.generateBodyForServiceImplMethod(mapperName, m, false));
+                        clazz.addMethod(serviceImplMethod);
+                    }
 
-                    clazz.addMethod(serviceImplMethod);
                 }));
     }
 
@@ -285,8 +304,12 @@ public class ServicePlugin extends PluginAdapter {
      * @return 方法
      */
     private Method additionalServiceLayerMethod(CompilationUnit compilation, Method m,boolean isAbstract, boolean pageMethod) {
-
         Method method = new Method(m.getName());
+        if(pageMethod){
+            PageMethodEnum pageMethodEnum = PageMethodEnum.getPageMethodEnumByMethodName(m.getName());
+            assert pageMethodEnum != null;
+            method = new Method(pageMethodEnum.getPageMethodName());
+        }
         method.setVisibility(JavaVisibility.PUBLIC);
         method.setAbstract(isAbstract);
 
@@ -303,7 +326,7 @@ public class ServicePlugin extends PluginAdapter {
         //方法设置返回值
         //判断是否是分页方法
         if(pageMethod){
-            FullyQualifiedJavaType fullyQualifiedJavaType = new FullyQualifiedJavaType(FullyQualifiedJavaTypeUtils.pageReturnType);
+            FullyQualifiedJavaType fullyQualifiedJavaType = new FullyQualifiedJavaType(FullyQualifiedJavaTypeEnum.PAGE_RETURN_TYPE.getJavaType());
             if(m.getReturnType().isPresent()){
                 List<FullyQualifiedJavaType> typeArguments = m.getReturnType().get().getTypeArguments();
                 for (FullyQualifiedJavaType typeArgument : typeArguments) {
@@ -327,21 +350,28 @@ public class ServicePlugin extends PluginAdapter {
      * 判断是否是分页方法
      * 方法名相同 方法中包含分页参数 确定为分页方法
      * @param method 方法
+     * @param introspectedTable
+     * @param existDtoModel
      * @return true 分页方法
      */
-    private boolean judgePageMethod(Method method) {
+    private boolean judgePageMethod(Method method, IntrospectedTable introspectedTable, boolean existDtoModel) {
         String methodName = method.getName();
-        //通过方法名获取 分页枚举类 下的所有参数
-        Parameter[] pageArgs = PageMethodEnum.getPageArgByMethodName(methodName);
-        if (pageArgs.length > 0) {
+        PageMethodEnum pageMethodEnum = PageMethodEnum.getPageMethodEnumByMethodName(methodName);
+        if(pageMethodEnum != null){
+            //存在dtoModel 且参数是model dtoModel 包含分页参数
+            if(existDtoModel && pageMethodEnum.getArgModel()){
+                return true;
+            }
+            //获取分页参数
+            Parameter[] pageArgs = PageArgsEnum.getPageArgs();
             List<Parameter> parameters = method.getParameters();
             if (CollectionUtils.isEmpty(parameters)) {
                 return false;
             }
-            //判断当前方法参数是否包含枚举类中当前方法名下的所有参数
+            //判断当前方法参数是否包含分页参数
             //flag 判断是否包含全部的标识符
             boolean flag = true;
-            List<String> paramToString = parameters.stream().flatMap(parameter -> Stream.of(parameter.toString())).collect(Collectors.toList());
+            List<String> paramToString = parameters.stream().peek(param -> param.getAnnotations().clear()).flatMap(parameter -> Stream.of(parameter.toString())).collect(Collectors.toList());
             for (Parameter pageArg : pageArgs) {
                 if (!paramToString.contains(pageArg.toString())) {
                     flag = false;
@@ -363,7 +393,7 @@ public class ServicePlugin extends PluginAdapter {
     private String generateBodyForServiceImplMethod(String mapperName, Method m, boolean pageMethod) {
         StringBuilder sbf = new StringBuilder("return ");
         if(pageMethod){
-            sbf.append("new PageInfo<>(");
+            sbf.append("new "+FullyQualifiedJavaTypeEnum.PAGE_RETURN_TYPE.getJavaTypeName()+"<>(");
         }
         sbf.append(mapperName).append(".").append(m.getName()).append("(");
 

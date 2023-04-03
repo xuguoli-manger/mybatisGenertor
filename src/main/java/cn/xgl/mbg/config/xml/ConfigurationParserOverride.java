@@ -74,6 +74,7 @@ public class ConfigurationParserOverride extends ConfigurationParser {
         parseErrors = new ArrayList<>();
     }
 
+    @Override
     public Configuration parseConfiguration(File inputFile) throws IOException,
             XMLParserException {
 
@@ -82,6 +83,7 @@ public class ConfigurationParserOverride extends ConfigurationParser {
         return parseConfiguration(fr);
     }
 
+    @Override
     public Configuration parseConfiguration(Reader reader) throws IOException,
             XMLParserException {
 
@@ -90,6 +92,7 @@ public class ConfigurationParserOverride extends ConfigurationParser {
         return parseConfiguration(is);
     }
 
+    @Override
     public Configuration parseConfiguration(InputStream inputStream)
             throws IOException, XMLParserException {
 
