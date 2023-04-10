@@ -1,0 +1,151 @@
+
+此项目为代码生成工具项目(支持swagger、pageHelper)
++ 根据配置的数据源和表名生成对应model
++ 根据配置的数据源和表名生成对应dao及其实现类,<font style="color:red">暂时只有selectForList和selectForPage两个方法</font>
++ 根据配置的数据源和表名生成对应mybitis的mapper文件及部分sql语句。<font style="color:red">(暂时只有对selectForList和selectForPage两个方法支持的sql语句)</font>
+
+使用方式:
+1. 下载工程到本地
+1. 按照格式说明配置src/main/resources下mapper-generatorconfig.xml文件
+1. 执行cn.fnii.mybatis.generator.Main类的main方法
+
+mapper-generatorconfig.xml文件样例(v1.0.0)
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        SYSTEM "src\main\resources\dtd\mybatis-service-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!-- context 是逆向工程的主要配置信息 -->
+    <!-- id：起个名字 -->
+    <!-- targetRuntime：设置生成的文件适用于那个 mybatis 版本 -->
+    <context id="default" targetRuntime="MyBatis3" defaultModelType="flat">
+        <!--项目路径-->
+        <property name="targetProjectPath" value="F:\git\idcsa\idcsaService"/>
+        <!--项目包名前缀 用于简化配置model\mapper\service\controller-->
+        <property name="targetPackagePrefix" value="cn.fnii.idcsa"/>
+        <!--生成dtoModel的包路径-->
+        <property name="dtoModelTargetPackage" value="model.dto"/>
+        <!--全局开启SelectListMethod-->
+        <property name="addSelectListMethod" value="true"/>
+        <!--全局开启分页方法-->
+        <property name="addPageMethod" value="true"/>
+        <!--全局开启whereSql语句-->
+        <property name="addWhereSql" value="true"/>
+        <!--全局开启orderBySql语句-->
+        <property name="addOrderBySql" value="true"/>
+        <!--全局开启limitSql语句-->
+        <property name="addLimitSql" value="true"/>
+
+        <plugin type="cn.fnii.mybatis.generator.plugin.LombokPlugin">
+            <property name="Data" value="true"/>
+            <property name="Getter" value="true"/>
+            <property name="Setter" value="true"/>
+            <property name="ToString" value="true"/>
+            <property name="EqualsAndHashCode" value="true"/>
+        </plugin>
+
+        <plugin type="cn.fnii.mybatis.generator.plugin.DtoModelPlugin"/>
+
+        <plugin type="org.mybatis.generator.plugins.VirtualPrimaryKeyPlugin"/>
+        <plugin type="cn.fnii.mybatis.generator.plugin.AddLimitSqlPlugin"/>
+        <plugin type="cn.fnii.mybatis.generator.plugin.AddOrderBySqlPlugin"/>
+        <plugin type="cn.fnii.mybatis.generator.plugin.WhereCasePlugin"/>
+        <!--增加selectForList(Map<String, Object> param)查询方法-->
+        <plugin type="cn.fnii.mybatis.generator.plugin.AddSelectListPlugin"/>
+        <!--xml文件生成默认是合并 这里进行关闭-->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
+        <!--增加分页方法-->
+        <plugin type="cn.fnii.mybatis.generator.plugin.AddPageMethodPlugin"/>
+        <plugin type="cn.fnii.mybatis.generator.plugin.ServicePlugin"/>
+        <plugin type="cn.fnii.mybatis.generator.plugin.ControllerPlugin"/>
+
+        <!--commentGenerator,指在创建class时，对注释进行控制-->
+        <commentGenerator type="cn.fnii.mybatis.generator.plugin.MyCommentGenerator">
+            <property name="suppressDate" value="false"/>
+            <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+            <property name="suppressAllComments" value="false"/>
+            <!--注释生成的时间格式-->
+            <property name="dateFormat" value="yyyy-MM-dd HH"/>
+            <!--作者-->
+            <property name="author" value="xgl"/>
+            <!--项目版本号-->
+            <property name="version" value="0.0.1-SNAPSHOT"/>
+            <!--controller 注释全部关闭 true：关闭 -->
+            <property name="controllerAllComments" value="false"/>
+            <!--controller 方法注释关闭 true：关闭-->
+            <!--<property name="controllerMethodComments" value="true"/>-->
+            <!--service 注释全部关闭 true：关闭-->
+            <property name="serviceAllComments" value="false"/>
+
+        </commentGenerator>
+
+        <!--jdbc的数据库连接 mysql-->
+        <jdbcConnection driverClass="com.clickhouse.jdbc.ClickHouseDriver"
+                        connectionURL="jdbc:clickhouse://172.171.2.111:8123/idc"
+                        userId=""
+                        password="">
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+
+        <!--sqlite对应驱动书写方式-->
+        <!--<jdbcConnection driverClass="org.sqlite.JDBC"
+                        connectionURL="jdbc:sqlite:D:\sqlite\tums\tums.db">
+        </jdbcConnection>-->
+        <!--非必须，类型处理器，在数据库类型和java类型之间的转换控制-->
+        <!--默认实现类 org.mybatis.generator.internal.types.JavaTypeResolverDefaultImpl-->
+        <javaTypeResolver>
+            <!-- true 情况下数据库中的 DECIMAL，NUMERIC 在 Java 对应是 sql 下的 BigDecimal 类 -->
+            <!--false 按数据库字段长度和精度来对应
+            精度>0或者长度>18，就会使用java.math.BigDecimal
+            精度=0并且10<=长度<=18，就会使用java.lang.Long
+            精度=0并且5<=长度<=9，就会使用java.lang.Integer
+            精度=0并且长度<5，就会使用java.lang.Short-->
+            <property name="forceBigDecimals" value="false"/>
+            <!--时间类型转换 true 为 java7新特性-->
+            <property name="useJSR310Types" value="true"/>
+        </javaTypeResolver>
+
+        <!-- targetPackage：生成的实体类所在的包 -->
+        <!-- targetProject：生成的实体类所在的硬盘位置 -->
+        <javaModelGenerator targetPackage="model.vo"
+                            targetProject="\src\main\java">
+            <!-- 是否允许子包 -->
+            <property name="enableSubPackages" value="false"/>
+            <!-- 是否对modal添加构造函数 -->
+            <property name="constructorBased" value="false"/>
+            <!-- 是否清理从数据库中查询出的字符串左右两边的空白字符 -->
+            <property name="trimStrings" value="true"/>
+            <!-- 建立modal对象是否不可改变 即生成的modal对象不会有setter方法，只有构造方法 -->
+            <property name="immutable" value="false"/>
+        </javaModelGenerator>
+        <!-- targetPackage 和 targetProject：生成的 mapper 文件的包和位置 -->
+        <sqlMapGenerator targetPackage="mapper"
+                         targetProject="\src\main\resources">
+            <!-- 针对数据库的一个配置，是否把 schema 作为字包名 -->
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+        <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
+        <javaClientGenerator type="XMLMAPPER"
+                             targetPackage="mapper.clickHouse"
+                             targetProject="\src\main\java">
+            <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为字包名 -->
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+
+        <javaServiceGenerator targetPackage="service"
+                              targetProject="\src\main\java"/>
+
+        <javaControllerGenerator targetPackage="controller"
+                              targetProject="\src\main\java">
+            <property name="swagger_open" value="true"/>
+        </javaControllerGenerator>
+
+        <!-- tableName是数据库中的表名，domainObjectName是生成的JAVA模型名，后面的参数不用改，要生成更多的表就在下面继续加table标签 -->
+        <table schema="idc" tableName="idc_busi" enableUpdateByExample="false" enableSelectByExample="false"
+        enableDeleteByExample="false" enableCountByExample="false" >
+            <property name="virtualKeyColumns" value="daytime,business_id,province"/>
+            <property name="addDtoModel" value="true"/>
+        </table>
+    </context>
+</generatorConfiguration>
+```
