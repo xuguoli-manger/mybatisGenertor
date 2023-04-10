@@ -3,6 +3,7 @@ package cn.xgl.mbg.plugin;
 import cn.xgl.mbg.enums.PageArgsEnum;
 import cn.xgl.mbg.util.XmlSqlIdRegister;
 import cn.xgl.mbg.util.PropertyUtils;
+import org.mybatis.generator.api.CommentGenerator;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.*;
@@ -80,6 +81,7 @@ public class AddSelectListPlugin extends PluginAdapter {
 
     private Method addMethod(Interface interfaze,IntrospectedTable introspectedTable) {
         Method method = new Method(XmlSqlIdRegister.SQL_ID_SELECT_LIST);
+        CommentGenerator commentGenerator = context.getCommentGenerator();
         method.setAbstract(true);
         FullyQualifiedJavaType paramJavaType = introspectedTable.getRules().calculateAllFieldsClass();
         String name = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
@@ -111,6 +113,7 @@ public class AddSelectListPlugin extends PluginAdapter {
         returnJavaType.addTypeArgument(introspectedTable.getRules().calculateAllFieldsClass());
         method.setReturnType(returnJavaType);
         interfaze.addImportedType(returnJavaType);
+        commentGenerator.addGeneralMethodComment(method,introspectedTable);
         return method;
     }
 }

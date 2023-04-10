@@ -4,10 +4,7 @@ import static org.mybatis.generator.internal.util.StringUtility.isTrue;
 
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 
 import cn.xgl.mbg.config.comment.CommentGeneratorOverride;
 import cn.xgl.mbg.enums.MethodRemark;
@@ -34,6 +31,7 @@ import org.mybatis.generator.internal.util.StringUtility;
  * @version V1.0
  */
 public class MyCommentGenerator implements CommentGeneratorOverride {
+    private static Map<String,String> columnRemark = new HashMap<>();
 
     /**
      * properties配置文件
@@ -207,9 +205,6 @@ public class MyCommentGenerator implements CommentGeneratorOverride {
         sb.append(introspectedTable.getFullyQualifiedTable());
         field.addJavaDocLine(sb.toString().replace("\n", " "));
         field.addJavaDocLine(" */");
-
-
-
     }
 
     /**
@@ -226,6 +221,9 @@ public class MyCommentGenerator implements CommentGeneratorOverride {
         sb.append(introspectedColumn.getRemarks());
         field.addJavaDocLine(sb.toString().replace("\n", " "));
         field.addJavaDocLine(" */");
+        String domainObjectName = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
+        columnRemark.put(domainObjectName,introspectedTable.getRemarks());
+        columnRemark.put(domainObjectName+field.getName(),introspectedColumn.getRemarks());
     }
 
     /**
@@ -241,7 +239,7 @@ public class MyCommentGenerator implements CommentGeneratorOverride {
             method.addJavaDocLine("/**");
             method.addJavaDocLine(" * " + methodComment);
             List<Parameter> parameters = method.getParameters();
-            parameters.forEach(parameter -> method.addJavaDocLine(" * @param " + parameter.getName()));
+            parameters.forEach(parameter -> method.addJavaDocLine(setParam(parameter,introspectedTable)));
             // 如果有返回类型，添加@return
             if (method.getReturnType().isPresent()) {
                 method.addJavaDocLine(" * @return ");
@@ -249,6 +247,19 @@ public class MyCommentGenerator implements CommentGeneratorOverride {
             method.addJavaDocLine(" */");
         }
 
+    }
+
+    private String setParam(Parameter parameter, IntrospectedTable introspectedTable) {
+        String param = " * @param " + parameter.getName();
+        String domainObjectName = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
+        if("row".equals(parameter.getName())){
+            param = param + " " + columnRemark.get(domainObjectName);
+        }else if(parameter.getName().endsWith("Dto")){
+            param = param + " " + columnRemark.get(domainObjectName);
+        }else {
+            param = param + " " +columnRemark.get(domainObjectName+parameter.getName());
+        }
+        return param;
     }
 
 
@@ -378,7 +389,7 @@ public class MyCommentGenerator implements CommentGeneratorOverride {
         method.addJavaDocLine("/**");
         method.addJavaDocLine(" * " + methodComment);
         List<Parameter> parameters = method.getParameters();
-        parameters.forEach(parameter -> method.addJavaDocLine(" * @param " + parameter.getName()));
+        parameters.forEach(parameter -> method.addJavaDocLine(setParam(parameter,introspectedTable)));
         // 如果有返回类型，添加@return
         if (method.getReturnType().isPresent()) {
             method.addJavaDocLine(" * @return ");
@@ -395,7 +406,7 @@ public class MyCommentGenerator implements CommentGeneratorOverride {
         method.addJavaDocLine("/**");
         method.addJavaDocLine(" * " + methodComment);
         List<Parameter> parameters = method.getParameters();
-        parameters.forEach(parameter -> method.addJavaDocLine(" * @param " + parameter.getName()));
+        parameters.forEach(parameter -> method.addJavaDocLine(setParam(parameter,introspectedTable)));
         // 如果有返回类型，添加@return
         if (method.getReturnType().isPresent()) {
             method.addJavaDocLine(" * @return ");
