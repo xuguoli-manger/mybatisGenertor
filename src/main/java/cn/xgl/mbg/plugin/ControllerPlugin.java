@@ -265,7 +265,7 @@ public class ControllerPlugin extends PluginAdapter {
                 SwaggerApiUtils.setApiParam(compilation,param)).collect(Collectors.toList()));
 
         if(m.getReturnType().isPresent()){
-            FullyQualifiedJavaType javaType = new FullyQualifiedJavaType(FullyQualifiedJavaTypeUtils.COMM_RESULT_TYPE);
+            FullyQualifiedJavaType javaType = new FullyQualifiedJavaType(FullyQualifiedJavaTypeEnum.COMM_RESULT_TYPE.getJavaType());
             javaType.addTypeArgument(BasicTypeConvertUtils.getJavaType(m.getReturnType().get()));
             //方法设置返回值
             method.setReturnType(javaType);

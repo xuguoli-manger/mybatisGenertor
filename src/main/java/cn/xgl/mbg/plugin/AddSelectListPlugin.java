@@ -45,7 +45,8 @@ public class AddSelectListPlugin extends PluginAdapter {
         String domainObjectName = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
         String addDtoModel = introspectedTable.getTableConfiguration().getProperty(PropertyUtils.ADD_DTO_MODEL);
         if(StringUtility.isTrue(addDtoModel)){
-            targetPackage = targetPackage + ".dto";
+            targetPackage = context.getProperties().getProperty(PropertyUtils.TARGET_PACKAGE_PREFIX) + "." +
+                    context.getProperties().getProperty(PropertyUtils.DTO_MODEL_TARGET_PACKAGE);
             domainObjectName = domainObjectName + "Dto";
         }
         String parameterType = targetPackage + "."+ domainObjectName;
@@ -87,7 +88,9 @@ public class AddSelectListPlugin extends PluginAdapter {
         List<Parameter> parameters = new ArrayList<>();
         if(StringUtility.isTrue(existDtoModel)){
             name = name+"Dto";
-            paramJavaType = new FullyQualifiedJavaType(context.getJavaModelGeneratorConfiguration().getTargetPackage()+".dto."+name);
+            String dtoTargetPackage = context.getProperties().getProperty(PropertyUtils.TARGET_PACKAGE_PREFIX) + "." +
+                    context.getProperties().getProperty(PropertyUtils.DTO_MODEL_TARGET_PACKAGE)+".";
+            paramJavaType = new FullyQualifiedJavaType(dtoTargetPackage+name);
         }else if(StringUtility.isTrue(existPageMethod)){
             boolean existOrderBySql = StringUtility.isTrue(context.getProperties().getProperty(PropertyUtils.ADD_ORDER_BY_SQL));
             if(existOrderBySql){

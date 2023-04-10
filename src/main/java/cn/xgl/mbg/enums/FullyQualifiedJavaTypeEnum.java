@@ -1,6 +1,5 @@
 package cn.xgl.mbg.enums;
 
-import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 
 /**
  * @Description:
@@ -10,8 +9,8 @@ import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 public enum  FullyQualifiedJavaTypeEnum {
     //
     PAGE_RETURN_TYPE("PageInfo","com.github.pagehelper.PageInfo"),
-    COMM_RESULT_TYPE("CommResult","cn.fnii.cloud.model.CommResult"),
-    RESULT_CODE_UTIL_TYPE("ResultCodeUtil","cn.fnii.cloud.utils.ResultCodeUtil"),
+    COMM_RESULT_TYPE("ResponseResult","cn.fnii.idcsa.model.ResponseResult"),
+    RESULT_CODE_UTIL_TYPE("ResponseResultUtils","cn.fnii.idcsa.utils.ResponseResultUtils"),
     ;
 
     private String javaTypeName;

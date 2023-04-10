@@ -6,8 +6,12 @@
     <!-- id：起个名字 -->
     <!-- targetRuntime：设置生成的文件适用于那个 mybatis 版本 -->
     <context id="default" targetRuntime="MyBatis3" defaultModelType="flat">
-
-        <property name="targetProjectPath" value="F:\git\cloud-demo\service-demo"/>
+        <!--项目路径-->
+        <property name="targetProjectPath" value="F:\git\idcsa\idcsaService"/>
+        <!--项目包名前缀 用于简化配置model\mapper\service\controller-->
+        <property name="targetPackagePrefix" value="cn.fnii.idcsa"/>
+        <!--生成dtoModel的包路径-->
+        <property name="dtoModelTargetPackage" value="model.dto"/>
         <!--全局开启SelectListMethod-->
         <property name="addSelectListMethod" value="true"/>
         <!--全局开启分页方法-->
@@ -90,7 +94,7 @@
 
         <!-- targetPackage：生成的实体类所在的包 -->
         <!-- targetProject：生成的实体类所在的硬盘位置 -->
-        <javaModelGenerator targetPackage="cn.fnii.cloud.model"
+        <javaModelGenerator targetPackage="model.vo"
                             targetProject="\src\main\java">
             <!-- 是否允许子包 -->
             <property name="enableSubPackages" value="false"/>
@@ -109,22 +113,22 @@
         </sqlMapGenerator>
         <!-- targetPackage 和 targetProject：生成的 interface 文件的包和位置 -->
         <javaClientGenerator type="XMLMAPPER"
-                             targetPackage="cn.fnii.cloud.mapper.clickHouse"
+                             targetPackage="mapper.clickHouse"
                              targetProject="\src\main\java">
             <!-- 针对 oracle 数据库的一个配置，是否把 schema 作为字包名 -->
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
 
-        <javaServiceGenerator targetPackage="cn.fnii.cloud.service"
+        <javaServiceGenerator targetPackage="service"
                               targetProject="\src\main\java"/>
 
-        <javaControllerGenerator targetPackage="cn.fnii.cloud.controller"
+        <javaControllerGenerator targetPackage="controller"
                               targetProject="\src\main\java">
             <property name="swagger_open" value="true"/>
         </javaControllerGenerator>
 
         <!-- tableName是数据库中的表名，domainObjectName是生成的JAVA模型名，后面的参数不用改，要生成更多的表就在下面继续加table标签 -->
-        <table schema="idc" tableName="idc_busi" domainObjectName="IdcBusi" enableUpdateByExample="false" enableSelectByExample="false"
+        <table schema="idc" tableName="idc_busi" enableUpdateByExample="false" enableSelectByExample="false"
         enableDeleteByExample="false" enableCountByExample="false" >
             <property name="virtualKeyColumns" value="daytime,business_id,province"/>
             <property name="addDtoModel" value="true"/>

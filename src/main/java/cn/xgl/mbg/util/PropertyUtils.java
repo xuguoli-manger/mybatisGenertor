@@ -35,4 +35,10 @@ public interface PropertyUtils {
 
     String ADD_DTO_MODEL = "addDtoModel";
 
+    String TARGET_PROJECT_PATH = "targetProjectPath";
+
+    String TARGET_PACKAGE_PREFIX = "targetPackagePrefix";
+
+    String DTO_MODEL_TARGET_PACKAGE = "dtoModelTargetPackage";
+
 }

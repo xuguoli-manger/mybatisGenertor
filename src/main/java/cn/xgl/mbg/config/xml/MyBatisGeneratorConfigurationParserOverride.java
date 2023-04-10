@@ -3,6 +3,7 @@ package cn.xgl.mbg.config.xml;
 import cn.xgl.mbg.config.ContextOverride;
 import cn.xgl.mbg.config.JavaControllerGeneratorConfiguration;
 import cn.xgl.mbg.config.JavaServiceGeneratorConfiguration;
+import cn.xgl.mbg.util.PropertyUtils;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.config.xml.MyBatisGeneratorConfigurationParser;
 import org.mybatis.generator.exception.XMLParserException;
@@ -123,16 +124,22 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
         contextOverride.setJavaServiceGeneratorConfiguration(javaServiceGeneratorConfiguration);
         Properties attributes = this.parseAttributes(node);
         Properties properties = contextOverride.getProperties();//获取公共属性
-        Object targetProjectPath = Optional.ofNullable(properties.get("targetProjectPath")).orElse("");
+        Object targetProjectPath = Optional.ofNullable(properties.get(PropertyUtils.TARGET_PROJECT_PATH)).orElse("");
+        Object targetPackagePrefix = properties.get(PropertyUtils.TARGET_PACKAGE_PREFIX);
+        if(StringUtils.isEmpty(targetPackagePrefix)){
+            targetPackagePrefix = "";
+        }else{
+            targetPackagePrefix = targetPackagePrefix.toString().endsWith(".") ? targetPackagePrefix : targetPackagePrefix + ".";
+        }
         String targetPackage = attributes.getProperty("targetPackage");
         String targetProject = attributes.getProperty("targetProject");
         String implementationPackage = attributes.getProperty("implementationPackage");
         if(StringUtils.isEmpty(implementationPackage)){
             implementationPackage = targetPackage + ".impl";
         }
-        javaServiceGeneratorConfiguration.setTargetPackage(targetPackage);
+        javaServiceGeneratorConfiguration.setTargetPackage(targetPackagePrefix+targetPackage);
         javaServiceGeneratorConfiguration.setTargetProject(targetProjectPath+targetProject);
-        javaServiceGeneratorConfiguration.setImplementationPackage(implementationPackage);
+        javaServiceGeneratorConfiguration.setImplementationPackage(targetPackagePrefix+implementationPackage);
         NodeList nodeList = node.getChildNodes();
 
         for(int i = 0; i < nodeList.getLength(); ++i) {
@@ -150,10 +157,16 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
         contextOverride.setJavaControllerGeneratorConfiguration(javaControllerGeneratorConfiguration);
         Properties attributes = this.parseAttributes(node);
         Properties properties = contextOverride.getProperties();
-        Object targetProjectPath = Optional.ofNullable(properties.get("targetProjectPath")).orElse("");
+        Object targetProjectPath = Optional.ofNullable(properties.get(PropertyUtils.TARGET_PROJECT_PATH)).orElse("");
+        Object targetPackagePrefix = properties.get(PropertyUtils.TARGET_PACKAGE_PREFIX);
+        if(StringUtils.isEmpty(targetPackagePrefix)){
+            targetPackagePrefix = "";
+        }else{
+            targetPackagePrefix = targetPackagePrefix.toString().endsWith(".") ? targetPackagePrefix : targetPackagePrefix + ".";
+        }
         String targetPackage = attributes.getProperty("targetPackage");
         String targetProject = attributes.getProperty("targetProject");
-        javaControllerGeneratorConfiguration.setTargetPackage(targetPackage);
+        javaControllerGeneratorConfiguration.setTargetPackage(targetPackagePrefix+targetPackage);
         javaControllerGeneratorConfiguration.setTargetProject(targetProjectPath+targetProject);
         NodeList nodeList = node.getChildNodes();
 
@@ -170,13 +183,19 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
         JavaClientGeneratorConfiguration javaClientGeneratorConfiguration = new JavaClientGeneratorConfiguration();
         context.setJavaClientGeneratorConfiguration(javaClientGeneratorConfiguration);
         Properties properties = context.getProperties();
-        Object targetProjectPath = Optional.ofNullable(properties.get("targetProjectPath")).orElse("");
+        Object targetProjectPath = Optional.ofNullable(properties.get(PropertyUtils.TARGET_PROJECT_PATH)).orElse("");
+        Object targetPackagePrefix = properties.get(PropertyUtils.TARGET_PACKAGE_PREFIX);
+        if(StringUtils.isEmpty(targetPackagePrefix)){
+            targetPackagePrefix = "";
+        }else{
+            targetPackagePrefix = targetPackagePrefix.toString().endsWith(".") ? targetPackagePrefix : targetPackagePrefix + ".";
+        }
         Properties attributes = this.parseAttributes(node);
         String type = attributes.getProperty("type");
         String targetPackage = attributes.getProperty("targetPackage");
         String targetProject = attributes.getProperty("targetProject");
         javaClientGeneratorConfiguration.setConfigurationType(type);
-        javaClientGeneratorConfiguration.setTargetPackage(targetPackage);
+        javaClientGeneratorConfiguration.setTargetPackage(targetPackagePrefix+targetPackage);
         javaClientGeneratorConfiguration.setTargetProject(targetProjectPath+targetProject);
         NodeList nodeList = node.getChildNodes();
 
@@ -194,7 +213,7 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
         SqlMapGeneratorConfiguration sqlMapGeneratorConfiguration = new SqlMapGeneratorConfiguration();
         context.setSqlMapGeneratorConfiguration(sqlMapGeneratorConfiguration);
         Properties properties = context.getProperties();
-        Object targetProjectPath = Optional.ofNullable(properties.get("targetProjectPath")).orElse("");
+        Object targetProjectPath = Optional.ofNullable(properties.get(PropertyUtils.TARGET_PROJECT_PATH)).orElse("");
         Properties attributes = this.parseAttributes(node);
         String targetPackage = attributes.getProperty("targetPackage");
         String targetProject = attributes.getProperty("targetProject");
@@ -216,11 +235,17 @@ public class MyBatisGeneratorConfigurationParserOverride extends MyBatisGenerato
         JavaModelGeneratorConfiguration javaModelGeneratorConfiguration = new JavaModelGeneratorConfiguration();
         context.setJavaModelGeneratorConfiguration(javaModelGeneratorConfiguration);
         Properties properties = context.getProperties();
-        Object targetProjectPath = Optional.ofNullable(properties.get("targetProjectPath")).orElse("");
+        Object targetProjectPath = Optional.ofNullable(properties.get(PropertyUtils.TARGET_PROJECT_PATH)).orElse("");
+        Object targetPackagePrefix = properties.get(PropertyUtils.TARGET_PACKAGE_PREFIX);
+        if(StringUtils.isEmpty(targetPackagePrefix)){
+            targetPackagePrefix = "";
+        }else{
+            targetPackagePrefix = targetPackagePrefix.toString().endsWith(".") ? targetPackagePrefix : targetPackagePrefix + ".";
+        }
         Properties attributes = this.parseAttributes(node);
         String targetPackage = attributes.getProperty("targetPackage");
         String targetProject = attributes.getProperty("targetProject");
-        javaModelGeneratorConfiguration.setTargetPackage(targetPackage);
+        javaModelGeneratorConfiguration.setTargetPackage(targetPackagePrefix+targetPackage);
         javaModelGeneratorConfiguration.setTargetProject(targetProjectPath+targetProject);
         NodeList nodeList = node.getChildNodes();
 

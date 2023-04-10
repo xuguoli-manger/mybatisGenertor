@@ -30,7 +30,8 @@ public class DtoModelPlugin extends PluginAdapter {
             return list;
         }
         JavaModelGeneratorConfiguration javaModelGeneratorConfiguration = context.getJavaModelGeneratorConfiguration();
-        String targetPackage = javaModelGeneratorConfiguration.getTargetPackage() + ".dto";
+        String targetPackagePrefix = context.getProperties().getProperty(PropertyUtils.TARGET_PACKAGE_PREFIX);
+        String targetPackage = targetPackagePrefix+"."+context.getProperties().getProperty(PropertyUtils.DTO_MODEL_TARGET_PACKAGE);
         String targetProject = javaModelGeneratorConfiguration.getTargetProject();
 
         //设置swagger 开关
